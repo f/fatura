@@ -1,8 +1,4 @@
-const {
-  createInvoiceAndGetDownloadURL,
-  getToken,
-  viewInvoice
-} = require("./index");
+const { createInvoiceAndGetDownloadURL } = require("./index");
 
 async function main() {
   await createInvoiceAndGetDownloadURL("<GIB Kodu>", "<GIB Parola>", {
