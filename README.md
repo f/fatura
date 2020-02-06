@@ -1,6 +1,13 @@
 # 🧾 Fatura.js
 
-eFatura sistemi üzerinde fatura oluşturmanızı sağlar.
+eArşiv sistemi üzerinde fatura oluşturmanızı sağlar.
+
+### Alternatifler
+
+| Dil | Repo | Geliştirici |
+| --- | ---- | ----------- |
+| PHP | https://github.com/AdemAliDurmus/fatura | Adem Ali Durmuş |
+| PHP | https://github.com/furkankadioglu/efatura | Furkan Kadıoğlu |
 
 > Bu sistem **https://earsivportal.efatura.gov.tr/** adresini kullanarak bu sistem üzerinden fatura oluşturmanızı sağlar.
 
