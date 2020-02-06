@@ -3,7 +3,16 @@ const uuid = require("uuid/v1");
 const numberToText = require("number-to-text");
 require("number-to-text/converters/tr");
 
-const BASE_URL = "https://earsivportal.efatura.gov.tr";
+const ENV = {
+  PROD: {
+    BASE_URL: "https://earsivportal.efatura.gov.tr"
+  },
+  TEST: {
+    BASE_URL: "https://earsivportaltest.efatura.gov.tr"
+  }
+}
+
+let CURRENT_ENV = 'PROD'
 
 const COMMANDS = {
   createDraftInvoice: ["EARSIV_PORTAL_FATURA_OLUSTUR", "RG_BASITFATURA"],
@@ -12,10 +21,11 @@ const COMMANDS = {
     "EARSIV_PORTAL_FATURA_HSM_CIHAZI_ILE_IMZALA",
     "RG_BASITTASLAKLAR"
   ],
-  getInvoiceHTML: ["EARSIV_PORTAL_FATURA_GOSTER", "RG_BASITTASLAKLAR"]
+  getInvoiceHTML: ["EARSIV_PORTAL_FATURA_GOSTER", "RG_BASITTASLAKLAR"],
+  cancelDraftInvoice: ["EARSIV_PORTAL_FATURA_SIL", "RG_BASITTASLAKLAR"]
 };
 
-const DEFAULT_REQUEST_OPTS = {
+const DEFAULT_REQUEST_OPTS = () => ({
   credentials: "omit",
   headers: {
     accept: "*/*",
@@ -26,13 +36,17 @@ const DEFAULT_REQUEST_OPTS = {
     "sec-fetch-mode": "cors",
     "sec-fetch-site": "same-origin"
   },
-  referrer: `${BASE_URL}/intragiris.html`,
+  referrer: `${ENV[CURRENT_ENV].BASE_URL}/intragiris.html`,
   referrerPolicy: "no-referrer-when-downgrade",
   method: "POST",
   mode: "cors"
-};
+});
 
 // Utils:
+
+function enableTestMode() {
+  CURRENT_ENV = 'TEST'
+}
 
 function convertNumber(number) {
   return numberToText.convertToText(number, {
@@ -48,9 +62,9 @@ function convertPriceToText(price) {
 }
 
 async function runCommand(token, command, pageName, data) {
-  const response = await fetch(`${BASE_URL}/earsiv-services/dispatch`, {
-    ...DEFAULT_REQUEST_OPTS,
-    referrer: `${BASE_URL}/login.jsp`,
+  const response = await fetch(`${ENV[CURRENT_ENV].BASE_URL}/earsiv-services/dispatch`, {
+    ...DEFAULT_REQUEST_OPTS(),
+    referrer: `${ENV[CURRENT_ENV].BASE_URL}/login.jsp`,
     body: `cmd=${command}&callid=${uuid()}&pageName=${pageName}&token=${token}&jp=${encodeURIComponent(
       JSON.stringify(data)
     )}`
@@ -61,10 +75,10 @@ async function runCommand(token, command, pageName, data) {
 // Token Getter
 
 async function getToken(userName, password) {
-  const response = await fetch(`${BASE_URL}/earsiv-services/assos-login`, {
-    ...DEFAULT_REQUEST_OPTS,
-    referrer: `${BASE_URL}/intragiris.html`,
-    body: `assoscmd=anologin&rtype=json&userid=${userName}&sifre=${password}&sifre2=${password}&parola=1&`
+  const response = await fetch(`${ENV[CURRENT_ENV].BASE_URL}/earsiv-services/assos-login`, {
+    ...DEFAULT_REQUEST_OPTS(),
+    referrer: `${ENV[CURRENT_ENV].BASE_URL}/intragiris.html`,
+    body: `assoscmd=${CURRENT_ENV === 'PROD' ? 'anologin' : 'login'}&rtype=json&userid=${userName}&sifre=${password}&sifre2=${password}&parola=1&`
   });
   const json = await response.json();
   return json.token;
@@ -176,7 +190,7 @@ async function getInvoiceHTML(token, uuid, { signed }) {
 }
 
 function getDownloadURL(token, invoiceUUID, { signed }) {
-  return `${BASE_URL}/earsiv-services/download?token=${token}&ettn=${invoiceUUID}&belgeTip=FATURA&onayDurumu=${encodeURIComponent(
+  return `${ENV[CURRENT_ENV].BASE_URL}/earsiv-services/download?token=${token}&ettn=${invoiceUUID}&belgeTip=FATURA&onayDurumu=${encodeURIComponent(
     signed ? "Onaylandı" : "Onaylanmadı"
   )}&cmd=downloadResource&`;
 }
@@ -194,28 +208,39 @@ async function createInvoice(
     await signDraftInvoice(token, draftInvoiceDetails);
   }
   return {
+    token,
     uuid: draftInvoice.uuid,
     signed: sign
   };
 }
 
 async function createInvoiceAndGetDownloadURL(...args) {
-  const { uuid, signed } = await createInvoice(...args);
+  const { token, uuid, signed } = await createInvoice(...args);
   return getDownloadURL(token, uuid, signed);
 }
 
 async function createInvoiceAndGetHTML(...args) {
-  const { uuid, signed } = await createInvoice(...args);
+  const { token, uuid, signed } = await createInvoice(...args);
   return getInvoiceHTML(token, uuid, signed);
 }
 
+async function cancelDraftInvoice(token, reason, draftInvoice) {
+  const cancel = await runCommand(token, ...COMMANDS.cancelDraftInvoice, {
+    silinecekler: [draftInvoice],
+    aciklama: reason
+  });
+  return cancel.data;
+}
+
 module.exports = {
+  enableTestMode,
   getToken,
   createDraftInvoice,
   findDraftInvoice,
   signDraftInvoice,
   getDownloadURL,
-  viewInvoice,
+  getInvoiceHTML,
   createInvoiceAndGetHTML,
-  createInvoiceAndGetDownloadURL
+  createInvoiceAndGetDownloadURL,
+  cancelDraftInvoice
 };

@@ -21,7 +21,7 @@ npm install fatura
 
 Oldukça kolay bir kullanıma sahiptir:
 
-#### `fatura.createInvoiceAndGetDownloadURL()`
+#### `createInvoiceAndGetDownloadURL(user, pass, invoice, { sign })`
 
 Bu method ile fatura oluşturulup imzalanır ve indirme adresi döner.
 
@@ -32,11 +32,13 @@ const faturaURL = await fatura.createInvoiceAndGetDownloadURL(
     'GIB Kullanıcı Adı', 
     'GIB Parolası', {
         ... faturaDetayları
-    }
+    },
+    // Varsayılan olarak sign: true gönderilir.
+    { sign: false }
 )
 ```
 
-#### `fatura.createInvoiceAndGetHTML()`
+#### `createInvoiceAndGetHTML(user, pass, invoice, { sign })`
 
 Bu method ile fatura oluşturulup imzalanır ve fatura HTML'i döner. Bu HTML'i `iframe` içerisinde gösterip yazdırılmasını sağlayabilirsiniz.
 
@@ -47,7 +49,9 @@ const faturaHTML = await fatura.createInvoiceAndGetHTML(
     'GIB Kullanıcı Adı', 
     'GIB Parolası', {
         ... faturaDetayları
-    }
+    },
+    // Varsayılan olarak sign: true gönderilir.
+    { sign: false }
 )
 ```
 
@@ -57,11 +61,15 @@ const faturaHTML = await fatura.createInvoiceAndGetHTML(
 
 Muhtemelen pek gerekmeyecek diğer alt fonksiyonlar:
 
-#### `fatura.getToken(user, pass): String`
+#### `enableTestMode()`
+
+Bu fonksiyonu çağırdığınızda sistem **https://earsivportaltest.efatura.gov.tr** adresini kullanmaya geçer. Fakat burada sistem bazen dolu olabilir.
+
+#### `getToken(user, pass): String`
 
 **eFatura Portal**'ını kullanabileceğiniz `token`'ı döner.
 
-#### `fatura.createDraftInvoice(token, invoiceDetails): Object`
+#### `createDraftInvoice(token, invoiceDetails): Object`
 
 eFatura.gov.tr'de fatura direkt oluşmaz. Önce **Taslak** fatura oluşturmak gerekir. `createDraftInvoice` size taslak bir fatura oluşturacaktır. `invoiceDetails` parametresi aşağıdaki şekilde bir JavaScript nesnesi kabul eder:
 
@@ -92,23 +100,27 @@ eFatura.gov.tr'de fatura direkt oluşmaz. Önce **Taslak** fatura oluşturmak ge
 }
 ```
 
-#### `fatura.findDraftInvoice(token, { date, uuid }): Object`
+#### `findDraftInvoice(token, { date, uuid }): Object`
 
 Her fatura için bir `uuid` oluşturulur. Bu `uuid` kullanılarak faturanın oluşturulduğu tarih içerisindeki taslak fatura bulunur ve getirilir. Bu veri içerisinde **imzalama** esnasında gerekecek **GIB Belge Numarası** bulunur. Bu method ile diğer taslak faturalara da erişebilirsiniz.
 
-#### `fatura.signDraftInvoice(token, draftInvoice): void`
+#### `signDraftInvoice(token, draftInvoice): void`
 
 ☢️ Fatura imzalama faturanın kesilmesi işlemidir ve **vergi sisteminde mali veri oluşturur.** Bu nedenle dikkatli kullanınız.
 
 `findDraftInvoice` methodu ile alınan veri `draftInvoice` parametresine gönderilerek bulunan faturanın imzalanması sağlanır.
 
-#### `fatura.getDownloadURL(token, uuid): String`
+#### `getDownloadURL(token, uuid): String`
 
 İmzalanmış faturaların efatura.gov.tr üzerinden indirme bağlantısını döner ve `.zip` formatında indirir. Bu dosya içerisinde `html` ve `xml` dosyaları bulunur.
 
-#### `fatura.getInvoiceHTML(token, uuid): String`
+#### `getInvoiceHTML(token, uuid): String`
 
 İmzalanmış faturaların efatura.gov.tr üzerinden HTML içerigini döner. Bu metni dosyaya kaydedebilir ya da `iframe` üzerinden yazdırılmasını sağlayabilirsiniz.
+
+#### `cancelDraftInvoice(token, reason, draftInvoice): String`
+
+Taslak halindeki faturalar iptal edilebilir.
 
 ## Lisans
 MIT

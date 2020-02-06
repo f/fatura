@@ -1,7 +1,9 @@
-const { createInvoiceAndGetDownloadURL } = require("./index");
+const { enableTestMode, createInvoiceAndGetDownloadURL } = require("./index");
+
+// enableTestMode()
 
 async function main() {
-  await createInvoiceAndGetDownloadURL("<GIB Kodu>", "<GIB Parola>", {
+  const x = await createInvoiceAndGetDownloadURL("<GIB Kodu>", "<GIB Parola>", {
     date: "08/02/2020",
     time: "09:07:48",
     taxIDOrTRID: "11111111111",
@@ -24,7 +26,10 @@ async function main() {
     grandTotal: 0.01,
     grandTotalInclVAT: 0.01,
     paymentTotal: 0.01
+  }, {
+    sign: false
   });
+  console.log(x)
 }
 
 main();
