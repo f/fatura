@@ -21,6 +21,10 @@ npm install fatura
 
 Oldukça kolay bir kullanıma sahiptir:
 
+#### `fatura.createInvoiceAndGetDownloadURL()`
+
+Bu method ile fatura oluşturulup imzalanır ve indirme adresi döner.
+
 ```js
 const fatura = require('fatura')
 
@@ -31,6 +35,23 @@ const faturaURL = await fatura.createInvoiceAndGetDownloadURL(
     }
 )
 ```
+
+#### `fatura.createInvoiceAndGetHTML()`
+
+Bu method ile fatura oluşturulup imzalanır ve fatura HTML'i döner. Bu HTML'i `iframe` içerisinde gösterip yazdırılmasını sağlayabilirsiniz.
+
+```js
+const fatura = require('fatura')
+
+const faturaHTML = await fatura.createInvoiceAndGetHTML(
+    'GIB Kullanıcı Adı', 
+    'GIB Parolası', {
+        ... faturaDetayları
+    }
+)
+```
+
+---
 
 ## Diğer Fonksiyonlar
 
@@ -83,7 +104,11 @@ Her fatura için bir `uuid` oluşturulur. Bu `uuid` kullanılarak faturanın olu
 
 #### `fatura.getDownloadURL(token, uuid): String`
 
-İmzalanmış faturaları efatura.gov.tr üzerinden indirme bağlantısını döner ve `.zip` formatında indirir. Bu dosya içerisinde `html` ve `xml` dosyaları bulunur.
+İmzalanmış faturaların efatura.gov.tr üzerinden indirme bağlantısını döner ve `.zip` formatında indirir. Bu dosya içerisinde `html` ve `xml` dosyaları bulunur.
+
+#### `fatura.getInvoiceHTML(token, uuid): String`
+
+İmzalanmış faturaların efatura.gov.tr üzerinden HTML içerigini döner. Bu metni dosyaya kaydedebilir ya da `iframe` üzerinden yazdırılmasını sağlayabilirsiniz.
 
 ## Lisans
 MIT
