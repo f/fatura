@@ -1,6 +1,6 @@
 {
   "name": "fatura",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "GİB eFatura.gov.tr Fatura Oluşturucu",
   "main": "index.js",
   "dependencies": {
