@@ -34,6 +34,10 @@ const COMMANDS = {
   verifySMSCode: ["EARSIV_PORTAL_SMSSIFRE_DOGRULA", "RG_SMSONAY"],
   getUserData: ["EARSIV_PORTAL_KULLANICI_BILGILERI_GETIR", "RG_KULLANICI"],
   updateUserData: ["EARSIV_PORTAL_KULLANICI_BILGILERI_KAYDET", "RG_KULLANICI"]
+
+  // TODO:
+  // createProducerReceipt: ['EARSIV_PORTAL_MUSTAHSIL_OLUSTUR', 'RG_MUSTAHSIL'],
+  // createSelfEmployedInvoice: ['EARSIV_PORTAL_SERBEST_MESLEK_MAKBUZU_OLUSTUR', 'RG_SERBEST'],
 };
 
 const DEFAULT_REQUEST_OPTS = () => ({
@@ -132,7 +136,7 @@ async function createDraftInvoice(token, invoiceDetails = {}) {
     fax: invoiceDetails.faxNumber,
     eposta: invoiceDetails.email,
     websitesi: invoiceDetails.webSite,
-    iadeTable: (invoiceDetails.returnItems || []).map(),
+    iadeTable: (invoiceDetails.returnItems || []).map(item => ({})),
     ozelMatrahTutari: (invoiceDetails.specialTaxBaseAmount || 0).toFixed(2),
     ozelMatrahOrani: invoiceDetails.specialTaxBaseRate || "",
     ozelMatrahVergiTutari: (
@@ -277,34 +281,34 @@ async function verifySignSMSCode(token, smsCode, operationId) {
   return sms.oid;
 }
 
-async function getUserData() {
+async function getUserData(token) {
   const user = await runCommand(token, ...COMMANDS.getUserData);
   return {
-    taxIDOrTRID: user.vknTckn,
-    title: user.unvan,
-    name: user.ad,
-    surname: user.soyad,
-    registryNo: user.sicilNo,
-    mersisNo: user.mersisNo,
-    taxOffice: user.vergiDairesi,
-    fullAddress: user.cadde,
-    buildingName: user.apartmanAdi,
-    buildingNumber: user.apartmanNo,
-    doorNumber: user.kapiNo,
-    town: user.kasaba,
-    district: user.ilce,
-    city: user.il,
-    zipCode: user.postaKodu,
-    country: user.ulke,
-    phoneNumber: user.telNo,
-    faxNumber: user.faksNo,
-    email: user.ePostaAdresi,
-    webSite: user.webSitesiAdresi,
-    businessCenter: user.isMerkezi
+    taxIDOrTRID: user.data.vknTckn,
+    title: user.data.unvan,
+    name: user.data.ad,
+    surname: user.data.soyad,
+    registryNo: user.data.sicilNo,
+    mersisNo: user.data.mersisNo,
+    taxOffice: user.data.vergiDairesi,
+    fullAddress: user.data.cadde,
+    buildingName: user.data.apartmanAdi,
+    buildingNumber: user.data.apartmanNo,
+    doorNumber: user.data.kapiNo,
+    town: user.data.kasaba,
+    district: user.data.ilce,
+    city: user.data.il,
+    zipCode: user.data.postaKodu,
+    country: user.data.ulke,
+    phoneNumber: user.data.telNo,
+    faxNumber: user.data.faksNo,
+    email: user.data.ePostaAdresi,
+    webSite: user.data.webSitesiAdresi,
+    businessCenter: user.data.isMerkezi
   };
 }
 
-async function updateUserData(userData) {
+async function updateUserData(token, userData) {
   const user = await runCommand(token, ...COMMANDS.updateUserData, {
     vknTckn: userData.taxIDOrTRID,
     unvan: userData.title,
