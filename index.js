@@ -88,7 +88,7 @@ async function getToken(userName, password) {
 
 async function createDraftInvoice(token, invoiceDetails = {}) {
   const invoiceData = {
-    faturaUuid: uuid(),
+    faturaUuid: invoiceDetails.uuid || uuid(),
     belgeNumarasi: "",
     faturaTarihi: invoiceDetails.date,
     saat: invoiceDetails.time,

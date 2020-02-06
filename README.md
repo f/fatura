@@ -73,8 +73,13 @@ Bu fonksiyonu çağırdığınızda sistem **https://earsivportaltest.efatura.go
 
 eFatura.gov.tr'de fatura direkt oluşmaz. Önce **Taslak** fatura oluşturmak gerekir. `createDraftInvoice` size taslak bir fatura oluşturacaktır. `invoiceDetails` parametresi aşağıdaki şekilde bir JavaScript nesnesi kabul eder:
 
+> ℹ️ UUID vermezseniz yeni bir UUID atanır.
+
 ```js
 {
+    // UUID vermezseniz yeni bir UUID yaratılacaktır.
+    uuid: "4c72cb57-b72d-4812-ac48-0a0bce83e771",
+    
     date: "08/02/2020",
     time: "09:07:48",
     taxIDOrTRID: "11111111111",
