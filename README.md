@@ -79,7 +79,7 @@ eFatura.gov.tr'de fatura direkt oluşmaz. Önce **Taslak** fatura oluşturmak ge
 {
     // UUID vermezseniz yeni bir UUID yaratılacaktır.
     uuid: "4c72cb57-b72d-4812-ac48-0a0bce83e771",
-    
+
     date: "08/02/2020",
     time: "09:07:48",
     taxIDOrTRID: "11111111111",
@@ -105,9 +105,13 @@ eFatura.gov.tr'de fatura direkt oluşmaz. Önce **Taslak** fatura oluşturmak ge
 }
 ```
 
-#### `findDraftInvoice(token, { date, uuid }): Object`
+#### `findInvoice(token, { date, uuid }): Object`
 
 Her fatura için bir `uuid` oluşturulur. Bu `uuid` kullanılarak faturanın oluşturulduğu tarih içerisindeki taslak fatura bulunur ve getirilir. Bu veri içerisinde **imzalama** esnasında gerekecek **GIB Belge Numarası** bulunur. Bu method ile diğer taslak faturalara da erişebilirsiniz.
+
+#### `getAllInvoicesByDateRange(token, { startDate, endDate }): Array`
+
+İki tarih arasındaki tüm faturaları döner.
 
 #### `signDraftInvoice(token, draftInvoice): void`
 
