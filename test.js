@@ -1,4 +1,8 @@
-const { createInvoiceAndGetDownloadURL } = require("./index");
+const {
+  createInvoiceAndGetDownloadURL,
+  getToken,
+  viewInvoice
+} = require("./index");
 
 async function main() {
   await createInvoiceAndGetDownloadURL("<GIB Kodu>", "<GIB Parola>", {
@@ -17,10 +21,10 @@ async function main() {
         unitPrice: 0.01,
         price: 0.01,
         VATRate: 18,
-        VATAmount: 0.00
+        VATAmount: 0.0
       }
     ],
-    totalVAT: 0.00,
+    totalVAT: 0.0,
     grandTotal: 0.01,
     grandTotalInclVAT: 0.01,
     paymentTotal: 0.01

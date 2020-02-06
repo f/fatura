@@ -11,7 +11,8 @@ const COMMANDS = {
   signDraftInvoice: [
     "EARSIV_PORTAL_FATURA_HSM_CIHAZI_ILE_IMZALA",
     "RG_BASITTASLAKLAR"
-  ]
+  ],
+  getInvoiceHTML: ["EARSIV_PORTAL_FATURA_GOSTER", "RG_BASITTASLAKLAR"]
 };
 
 const DEFAULT_REQUEST_OPTS = {
@@ -166,21 +167,46 @@ async function signDraftInvoice(token, draftInvoice) {
   });
 }
 
-function getDownloadURL(token, invoiceUUID) {
-  return `${BASE_URL}/earsiv-services/download?token=${token}&ettn=${invoiceUUID}&belgeTip=FATURA&onayDurumu=Onayland%C4%B1&cmd=downloadResource&`;
+async function getInvoiceHTML(token, uuid, { signed }) {
+  const invoice = await runCommand(token, ...COMMANDS.getInvoiceHTML, {
+    ettn: uuid,
+    onayDurumu: signed ? "Onaylandı" : "Onaylanmadı"
+  });
+  return invoice.data;
 }
 
-async function createInvoiceAndGetDownloadURL(
+function getDownloadURL(token, invoiceUUID, { signed }) {
+  return `${BASE_URL}/earsiv-services/download?token=${token}&ettn=${invoiceUUID}&belgeTip=FATURA&onayDurumu=${encodeURIComponent(
+    signed ? "Onaylandı" : "Onaylanmadı"
+  )}&cmd=downloadResource&`;
+}
+
+async function createInvoice(
   userId,
   password,
-  invoiceDetails
+  invoiceDetails,
+  { sign = true } = {}
 ) {
   const token = await getToken(userId, password);
   const draftInvoice = await createDraftInvoice(token, invoiceDetails);
   const draftInvoiceDetails = await findDraftInvoice(token, draftInvoice);
-  await signDraftInvoice(token, draftInvoiceDetails);
-  const download = getDownloadURL(token, draftInvoice.uuid);
-  return download;
+  if (sign) {
+    await signDraftInvoice(token, draftInvoiceDetails);
+  }
+  return {
+    uuid: draftInvoice.uuid,
+    signed: sign
+  };
+}
+
+async function createInvoiceAndGetDownloadURL(...args) {
+  const { uuid, signed } = await createInvoice(...args);
+  return getDownloadURL(token, uuid, signed);
+}
+
+async function createInvoiceAndGetHTML(...args) {
+  const { uuid, signed } = await createInvoice(...args);
+  return getInvoiceHTML(token, uuid, signed);
 }
 
 module.exports = {
@@ -189,5 +215,7 @@ module.exports = {
   findDraftInvoice,
   signDraftInvoice,
   getDownloadURL,
+  viewInvoice,
+  createInvoiceAndGetHTML,
   createInvoiceAndGetDownloadURL
 };
