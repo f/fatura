@@ -1,0 +1,31 @@
+{
+  "name": "fatura",
+  "version": "0.0.1",
+  "description": "GİB eFatura.gov.tr Fatura Oluşturucu",
+  "main": "index.js",
+  "dependencies": {
+    "isomorphic-fetch": "^2.2.1",
+    "number-to-text": "^0.3.8",
+    "uuid": "^3.4.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/f/fatura.git"
+  },
+  "keywords": [
+    "fatura",
+    "giv",
+    "efatura",
+    "earsiv"
+  ],
+  "author": "Fatih Kadir Akın <fatihkadirakin@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/f/fatura/issues"
+  },
+  "homepage": "https://github.com/f/fatura#readme"
+}
