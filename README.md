@@ -2,6 +2,13 @@
 
 eFatura sistemi üzerinde fatura oluşturmanızı sağlar.
 
+### Alternatifler
+
+| Dil | Repo | Geliştirici |
+| --- | ---- | ----------- |
+| PHP | https://github.com/AdemAliDurmus/fatura | Adem Ali Durmuş |
+| PHP | https://github.com/furkankadioglu/efatura | Furkan Kadıoğlu |
+
 > Bu sistem **https://earsivportal.efatura.gov.tr/** adresini kullanarak bu sistem üzerinden fatura oluşturmanızı sağlar.
 
 > Bu sistem GİB'e tabi **şahış şirketi** ya da **şirket** hesapları ile çalışır ve bu kişilikler adına resmi fatura oluşturur. Kesilen faturaları https://earsivportal.efatura.gov.tr/ adresinden görüntüleyebilir ya da bu kütüphane ile indirebilirsiniz.
