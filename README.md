@@ -1,6 +1,6 @@
 # 🧾 Fatura.js
 
-eFatura sistemi üzerinde fatura oluşturmanızı sağlar.
+eArşiv sistemi üzerinde fatura oluşturmanızı sağlar.
 
 ### Alternatifler
 
