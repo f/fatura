@@ -9,7 +9,7 @@ eFatura sistemi üzerinde fatura oluşturmanızı sağlar.
 #### Kullanıcı Adı ve Parola Bilgileri
 
 > [https://earsivportal.efatura.gov.tr/intragiris.html](https://earsivportal.efatura.gov.tr/intragiris.html) adresindeki parola ekranında kullanılan kullanıcı kodu ve parola ile bu paketi kullanabilirsiniz.
-> ℹ️ Bu **kullanıcı kodu ve parola bilgilerini** muhasebecinizden ya da **GİB - İnteraktif Vergi Dariesi**'nden edinebilirsiniz.
+> ℹ️ Bu **kullanıcı kodu ve parola bilgilerini** muhasebecinizden ya da **GİB - İnteraktif Vergi Dairesi**'nden edinebilirsiniz.
 
 ## Yükleme
 
