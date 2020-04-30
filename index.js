@@ -138,7 +138,7 @@ async function createDraftInvoice(token, invoiceDetails = {}) {
     websitesi: invoiceDetails.webSite,
     iadeTable: (invoiceDetails.returnItems || []).map(item => ({})),
     ozelMatrahTutari: (invoiceDetails.specialTaxBaseAmount || 0).toFixed(2),
-    ozelMatrahOrani: invoiceDetails.specialTaxBaseRate || "",
+    ozelMatrahOrani: invoiceDetails.specialTaxBaseRate || 0,
     ozelMatrahVergiTutari: (
       invoiceDetails.specialTaxBaseTaxAmount || 0
     ).toFixed(2),
@@ -193,7 +193,7 @@ async function createDraftInvoice(token, invoiceDetails = {}) {
   };
 }
 
-async function getAllInvoicesByDateRange(token, { startDate, endDate }) {
+async function getAllInvoicesByDateRange(token, startDate, endDate) {
   const invoices = await runCommand(
     token,
     ...COMMANDS.getAllInvoicesByDateRange,
@@ -209,7 +209,7 @@ async function getAllInvoicesByDateRange(token, { startDate, endDate }) {
 async function findInvoice(token, draftInvoice) {
   const { date, uuid } = draftInvoice;
   const invoices = await getAllInvoicesByDateRange(token, date, date);
-  return invoices.data.find(invoice => invoice.ettn === uuid);
+  return invoices.find(invoice => invoice.ettn === uuid);
 }
 
 async function signDraftInvoice(token, draftInvoice) {
