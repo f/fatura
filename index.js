@@ -111,13 +111,14 @@ async function getToken(userName, password) {
 
 async function createDraftInvoice(token, invoiceDetails = {}) {
   const invoiceData = {
-    faturaUuid: invoiceDetails.uuid || uuid(),
+   faturaUuid: invoiceDetails.uuid || uuid(),
     belgeNumarasi: invoiceDetails.documentNumber || "",
     faturaTarihi: invoiceDetails.date,
     saat: invoiceDetails.time,
     paraBirimi: invoiceDetails.currency || "TRY",
     dovzTLkur: invoiceDetails.currencyRate || "0",
     faturaTipi: invoiceDetails.invoiceType || "SATIS",
+    hangiTip: invoiceDetails.hangiTip || "Buyuk",
     siparisNumarasi: invoiceDetails.orderNumber || "",
     siparisTarihi: invoiceDetails.orderDate || "",
     irsaliyeNumarasi: invoiceDetails.dispatchNumber || "",
@@ -171,6 +172,10 @@ async function createDraftInvoice(token, invoiceDetails = {}) {
     halRusumuOrani: invoiceDetails.halRusumuOrani || 0,
     ticaretBorsasiOrani: invoiceDetails.ticaretBorsasiOrani || 0,
     milliSavunmaFonuOrani: invoiceDetails.milliSavunmaFonuOrani || 0,
+    digerOrani: invoiceDetails.digerOrani || 0,
+    halRusumuTutari: invoiceDetails.hammaliyeTutari || "0",
+    ticaretBorsasiTutari: invoiceDetails.ticaretBorsasiTutari || "0",
+    milliSavunmaFonuTutari: invoiceDetails.milliSavunmaFonuTutari || "0",
     digerTutari: invoiceDetails.digerTutari || "0",
     halRusumuKDVOrani: invoiceDetails.halRusumuKDVOrani || 0,
     ticaretBorsasiKDVOrani: invoiceDetails.ticaretBorsasiKDVOrani || 0,
@@ -182,7 +187,7 @@ async function createDraftInvoice(token, invoiceDetails = {}) {
     digerKDVTutari: invoiceDetails.digerKDVTutari || "0", 
     iadeTable: (invoiceDetails.returnItems || []).map(item => ({})),
     ozelMatrahTutari: (invoiceDetails.specialTaxBaseAmount || "0"),
-    ozelMatrahOrani: invoiceDetails.specialTaxBaseRate || "0",
+    ozelMatrahOrani: invoiceDetails.specialTaxBaseRate || 0,
     ozelMatrahVergiTutari: (
       invoiceDetails.specialTaxBaseTaxAmount || 0
     ).toFixed(2).toString(),
