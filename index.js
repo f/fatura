@@ -241,6 +241,7 @@ async function getAllInvoicesByDateRange(token, { startDate, endDate }) {
     {
       baslangic: startDate,
       bitis: endDate,
+      hangiTip:"5000/30000",
       table: []
     }
   );
