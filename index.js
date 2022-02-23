@@ -20,6 +20,10 @@ const COMMANDS = {
     "EARSIV_PORTAL_TASLAKLARI_GETIR",
     "RG_BASITTASLAKLAR"
   ],
+  getAllInvoicesIssuedToMeByDateRange: [
+    "EARSIV_PORTAL_ADIMA_KESILEN_BELGELERI_GETIR",
+    "RG_BASITTASLAKLAR"
+  ],
   signDraftInvoice: [
     "EARSIV_PORTAL_FATURA_HSM_CIHAZI_ILE_IMZALA",
     "RG_BASITTASLAKLAR"
@@ -248,6 +252,20 @@ async function getAllInvoicesByDateRange(token, { startDate, endDate }) {
   return invoices.data;
 }
 
+async function getAllInvoicesIssuedToMeByDateRange(token, { startDate, endDate }) {
+  const invoices = await runCommand(
+    token,
+    ...COMMANDS.getAllInvoicesIssuedToMeByDateRange,
+    {
+      baslangic: startDate,
+      bitis: endDate,
+      hangiTip:"5000/30000",
+      table: []
+    }
+  );
+  return invoices.data;
+}
+
 async function findInvoice(token, draftInvoice) {
   const { date, uuid } = draftInvoice;
   const invoices = await getAllInvoicesByDateRange(token, date, date);
@@ -413,6 +431,7 @@ module.exports = {
   getToken,
   createDraftInvoice,
   getAllInvoicesByDateRange,
+  getAllInvoicesIssuedToMeByDateRange,
   findInvoice,
   signDraftInvoice,
   getDownloadURL,
