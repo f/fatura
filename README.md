@@ -120,6 +120,10 @@ Her fatura için bir `uuid` oluşturulur. Bu `uuid` kullanılarak faturanın olu
 
 İki tarih arasındaki tüm faturaları döner.
 
+#### `getAllInvoicesIssuedToMeByDateRange(token, { startDate, endDate }): Array`
+
+İki tarih arasındaki gelen faturaları (GİB'deki adıyla Adıma Düzenlenen Belgeleri) döner.
+
 #### `signDraftInvoice(token, draftInvoice): void`
 
 ☢️ Fatura imzalama faturanın kesilmesi işlemidir ve **vergi sisteminde mali veri oluşturur.** Bu nedenle dikkatli kullanınız.
