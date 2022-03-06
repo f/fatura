@@ -111,6 +111,18 @@ async function getToken(userName, password) {
   return json.token;
 }
 
+// Logout
+
+async function logout(token) {
+  const response = await fetch(`${ENV[CURRENT_ENV].BASE_URL}/earsiv-services/assos-login`, {
+    ...DEFAULT_REQUEST_OPTS(),
+    referrer: `${ENV[CURRENT_ENV].BASE_URL}/intragiris.html`,
+    body: `assoscmd=${CURRENT_ENV === 'PROD' ? 'anologin' : 'logout'}&rtype=json&token=${token}&`,
+  });
+  const json = await response.json();
+  return json.data; // send redirect url
+}
+
 // API
 
 async function createDraftInvoice(token, invoiceDetails = {}) {
@@ -429,6 +441,7 @@ async function createInvoiceAndGetHTML(...args) {
 module.exports = {
   enableTestMode,
   getToken,
+  logout,
   createDraftInvoice,
   getAllInvoicesByDateRange,
   getAllInvoicesIssuedToMeByDateRange,
