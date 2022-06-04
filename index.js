@@ -22,7 +22,7 @@ const COMMANDS = {
   ],
   getAllInvoicesIssuedToMeByDateRange: [
     "EARSIV_PORTAL_ADIMA_KESILEN_BELGELERI_GETIR",
-    "RG_BASITTASLAKLAR"
+    "RG_ALICI_TASLAKLAR"
   ],
   signDraftInvoice: [
     "EARSIV_PORTAL_FATURA_HSM_CIHAZI_ILE_IMZALA",
