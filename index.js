@@ -182,8 +182,6 @@ async function createDraftInvoice(token, invoiceDetails = {}) {
     gelirVergisiOrani: invoiceDetails.gelirVergisiOrani || 0,
     bagkurTevkifatiOrani: invoiceDetails.bagkurTevkifatiOrani || 0,
     gelirVergisiTevkifatiTutari: invoiceDetails.gelirVergisiTevkifatiTutari || "0",
-    bagkurTevkifatiOrani: invoiceDetails.bagkurTevkifatiOrani || 0,
-    gelirVergisiTevkifatiTutari: invoiceDetails.gelirVergisiTevkifatiTutari || "0",
     bagkurTevkifatiTutari: invoiceDetails.bagkurTevkifatiTutari || "0",
     halRusumuOrani: invoiceDetails.halRusumuOrani || 0,
     ticaretBorsasiOrani: invoiceDetails.ticaretBorsasiOrani || 0,
