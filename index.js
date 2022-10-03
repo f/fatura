@@ -323,17 +323,6 @@ async function getRecipientDataByTaxIDOrTRID(token, taxIDOrTRID) {
   return recipient.data;
 }
 
-async function getRecipientDataByTaxIDOrTRID(token, taxIDOrTRID) {
-  const recipient = await runCommand(
-    token,
-    ...COMMANDS.getRecipientDataByTaxIDOrTRID,
-    {
-      vknTcknn: taxIDOrTRID
-    }
-  );
-  return recipient.data;
-}
-
 async function sendSignSMSCode(token, phone) {
   const sms = await runCommand(token, ...COMMANDS.sendSignSMSCode, {
     CEPTEL: phone,
