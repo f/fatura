@@ -301,7 +301,7 @@ function getDownloadURL(token, invoiceUUID, { signed }) {
     ENV[CURRENT_ENV].BASE_URL
   }/earsiv-services/download?token=${token}&ettn=${invoiceUUID}&belgeTip=FATURA&onayDurumu=${encodeURIComponent(
     signed ? "Onaylandı" : "Onaylanmadı"
-  )}&cmd=downloadResource&`;
+  )}&cmd=EARSIV_PORTAL_BELGE_INDIR&`;
 }
 
 async function cancelDraftInvoice(token, reason, draftInvoice) {
