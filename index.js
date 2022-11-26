@@ -280,7 +280,7 @@ async function getAllInvoicesIssuedToMeByDateRange(token, { startDate, endDate }
 
 async function findInvoice(token, draftInvoice) {
   const { date, uuid } = draftInvoice;
-  const invoices = await getAllInvoicesByDateRange(token, date, date);
+  const invoices = await getAllInvoicesByDateRange(token, { startDate: date, endDate: date });
   return invoices.data.find(invoice => invoice.ettn === uuid);
 }
 
