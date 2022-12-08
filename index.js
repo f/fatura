@@ -182,8 +182,6 @@ async function createDraftInvoice(token, invoiceDetails = {}) {
     gelirVergisiOrani: invoiceDetails.gelirVergisiOrani || 0,
     bagkurTevkifatiOrani: invoiceDetails.bagkurTevkifatiOrani || 0,
     gelirVergisiTevkifatiTutari: invoiceDetails.gelirVergisiTevkifatiTutari || "0",
-    bagkurTevkifatiOrani: invoiceDetails.bagkurTevkifatiOrani || 0,
-    gelirVergisiTevkifatiTutari: invoiceDetails.gelirVergisiTevkifatiTutari || "0",
     bagkurTevkifatiTutari: invoiceDetails.bagkurTevkifatiTutari || "0",
     halRusumuOrani: invoiceDetails.halRusumuOrani || 0,
     ticaretBorsasiOrani: invoiceDetails.ticaretBorsasiOrani || 0,
@@ -303,7 +301,7 @@ function getDownloadURL(token, invoiceUUID, { signed }) {
     ENV[CURRENT_ENV].BASE_URL
   }/earsiv-services/download?token=${token}&ettn=${invoiceUUID}&belgeTip=FATURA&onayDurumu=${encodeURIComponent(
     signed ? "Onaylandı" : "Onaylanmadı"
-  )}&cmd=downloadResource&`;
+  )}&cmd=EARSIV_PORTAL_BELGE_INDIR&`;
 }
 
 async function cancelDraftInvoice(token, reason, draftInvoice) {
@@ -312,17 +310,6 @@ async function cancelDraftInvoice(token, reason, draftInvoice) {
     aciklama: reason
   });
   return cancel.data;
-}
-
-async function getRecipientDataByTaxIDOrTRID(token, taxIDOrTRID) {
-  const recipient = await runCommand(
-    token,
-    ...COMMANDS.getRecipientDataByTaxIDOrTRID,
-    {
-      vknTcknn: taxIDOrTRID
-    }
-  );
-  return recipient.data;
 }
 
 async function getRecipientDataByTaxIDOrTRID(token, taxIDOrTRID) {
