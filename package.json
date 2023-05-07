@@ -4,7 +4,7 @@
   "description": "GİB eFatura.gov.tr Fatura Oluşturucu",
   "main": "index.js",
   "dependencies": {
-    "isomorphic-fetch": "^2.2.1",
+    "isomorphic-fetch": "^3.0.0",
     "number-to-text": "^0.3.8",
     "uuid": "^3.4.0"
   },
