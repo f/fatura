@@ -1,0 +1,20 @@
+---
+title: Ortam seçimi
+description: PROD ve TEST ortamlarının farkı ve kullanımı
+order: 20
+group: Başlangıç
+---
+
+`createFaturaClient` iki ortamı destekler:
+
+- `PROD`: `https://earsivportal.efatura.gov.tr`
+- `TEST`: `https://earsivportaltest.efatura.gov.tr`
+
+```ts
+import { createFaturaClient } from "fatura"
+
+const prodClient = createFaturaClient("PROD")
+const testClient = createFaturaClient("TEST")
+```
+
+Hangi ortamda çalıştığınızı parametreyle açıkça belirtin; böylece test ile canlı ortam birbirine karışmaz.

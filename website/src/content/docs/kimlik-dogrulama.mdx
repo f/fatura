@@ -1,0 +1,26 @@
+---
+title: Kimlik doğrulama
+description: GİB token alma ve çıkış işlemleri
+order: 30
+group: Kimlik ve oturum
+---
+
+## getToken
+
+Portal oturumu için token alır.
+
+```ts
+getToken(userName: string, password: string): Promise<string>
+```
+
+```ts
+const token = await client.getToken("KULLANICI", "PAROLA")
+```
+
+## logout
+
+Aktif token ile oturumu sonlandırır.
+
+```ts
+logout(token: string): Promise<unknown>
+```

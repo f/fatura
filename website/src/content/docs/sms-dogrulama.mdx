@@ -1,0 +1,20 @@
+---
+title: SMS doğrulama
+description: İmza sürecinde SMS kodu gönderme ve doğrulama
+order: 90
+group: Hesap
+---
+
+## sendSignSMSCode
+
+```ts
+sendSignSMSCode(token: string, phone: string): Promise<string | undefined>
+```
+
+## verifySignSMSCode
+
+```ts
+verifySignSMSCode(token: string, smsCode: string, operationId: string): Promise<string | undefined>
+```
+
+`sendSignSMSCode` yanıtında dönen OID, `verifySignSMSCode` çağrısında kullanılır.

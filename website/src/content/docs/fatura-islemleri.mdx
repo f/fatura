@@ -1,0 +1,36 @@
+---
+title: Fatura işlemleri
+description: Taslak oluşturma, bulma, imzalama ve iptal
+order: 40
+group: Fatura akışları
+---
+
+## createDraftInvoice
+
+```ts
+createDraftInvoice(token: string, invoiceDetails: InvoiceDetails): Promise<DraftInvoice>
+```
+
+```ts
+const draft = await client.createDraftInvoice(token, invoiceDetails)
+```
+
+## findInvoice
+
+```ts
+findInvoice(token: string, draftInvoice: DraftInvoice): Promise<InvoiceListItem | undefined>
+```
+
+## signDraftInvoice
+
+```ts
+signDraftInvoice(token: string, draftInvoice: InvoiceListItem): Promise<ApiResponse>
+```
+
+> İmzalama adımı malî kayıt oluşturabilir. Canlı (üretim) hesabında dikkatli kullanın.
+
+## cancelDraftInvoice
+
+```ts
+cancelDraftInvoice(token: string, reason: string, draftInvoice: InvoiceListItem): Promise<unknown>
+```
