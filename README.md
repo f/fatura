@@ -4,12 +4,12 @@ eArşiv sistemi üzerinde fatura oluşturmanızı sağlar.
 
 ### Alternatifler
 
-| Dil | Repo | Geliştirici |
-| --- | ---- | ----------- |
-| PHP | https://github.com/AdemAliDurmus/fatura | Adem Ali Durmuş |
-| PHP | https://github.com/furkankadioglu/efatura | Furkan Kadıoğlu |
-| PHP | https://github.com/mlevent/fatura | Mert Levent |
-| C#  | https://github.com/BFYDigital/e-arsiv-fatura-dotnet | BFY Digital |
+| Dil | Repo                                                | Geliştirici     |
+| --- | --------------------------------------------------- | --------------- |
+| PHP | https://github.com/AdemAliDurmus/fatura             | Adem Ali Durmuş |
+| PHP | https://github.com/furkankadioglu/efatura           | Furkan Kadıoğlu |
+| PHP | https://github.com/mlevent/fatura                   | Mert Levent     |
+| C#  | https://github.com/BFYDigital/e-arsiv-fatura-dotnet | BFY Digital     |
 
 > Bu sistem **https://earsivportal.efatura.gov.tr/** adresini kullanarak bu sistem üzerinden fatura oluşturmanızı sağlar.
 
@@ -35,19 +35,19 @@ Oldukça kolay bir kullanıma sahiptir:
 Bu method ile fatura oluşturulup imzalanır ve indirme adresi döner.
 
 ```js
-const { createFaturaClient } = require('fatura')
+const { createFaturaClient } = require("fatura");
 
-const client = createFaturaClient()
+const client = createFaturaClient();
 
 const faturaURL = await client.createInvoiceAndGetDownloadURL(
-    'GIB Kullanıcı Adı',
-    'GIB Parolası',
+    "GIB Kullanıcı Adı",
+    "GIB Parolası",
     {
         ...faturaDetayları,
     },
     // Varsayılan olarak sign: true gönderilir.
-    { sign: false }
-)
+    { sign: false },
+);
 ```
 
 #### `createInvoiceAndGetHTML(user, pass, invoice, { sign })`
@@ -55,19 +55,19 @@ const faturaURL = await client.createInvoiceAndGetDownloadURL(
 Bu method ile fatura oluşturulup imzalanır ve fatura HTML'i döner. Bu HTML'i `iframe` içerisinde gösterip yazdırılmasını sağlayabilirsiniz.
 
 ```js
-const { createFaturaClient } = require('fatura')
+const { createFaturaClient } = require("fatura");
 
-const client = createFaturaClient()
+const client = createFaturaClient();
 
 const faturaHTML = await client.createInvoiceAndGetHTML(
-    'GIB Kullanıcı Adı',
-    'GIB Parolası',
+    "GIB Kullanıcı Adı",
+    "GIB Parolası",
     {
         ...faturaDetayları,
     },
     // Varsayılan olarak sign: true gönderilir.
-    { sign: false }
-)
+    { sign: false },
+);
 ```
 
 ---
@@ -151,8 +151,9 @@ Her fatura için bir `uuid` oluşturulur. Bu `uuid` kullanılarak faturanın olu
 Taslak halindeki faturalar iptal edilebilir.
 
 ## Lisans
+
 MIT
 
-----
+---
 
 > ☢️ **BU PAKET VERGİYE TABİ OLAN MALİ VERİ OLUŞTURUR.** BU PAKET NEDENİYLE OLUŞABİLECEK SORUNLARDAN BU PAKET SORUMLU TUTULAMAZ, RİSK KULLANANA AİTTİR. RİSKLİ GÖRÜYORSANIZ KULLANMAYINIZ.

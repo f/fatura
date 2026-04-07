@@ -1,49 +1,59 @@
 {
-	"name": "fatura",
-	"version": "0.2.0",
-	"description": "GİB eFatura.gov.tr Fatura Oluşturucu",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
-	"files": [
-		"dist/",
-		"declarations/"
-	],
-	"engines": {
-		"node": ">=18.0.0"
-	},
-	"dependencies": {
-		"number-to-text": "^0.3.8",
-		"uuid": "^9.0.0"
-	},
-	"devDependencies": {
-		"@types/node": "^20.0.0",
-		"@types/uuid": "^9.0.0",
-		"@vitest/coverage-v8": "^4.1.2",
-		"typescript": "^5.4.0",
-		"vitest": "^4.1.2"
-	},
-	"scripts": {
-		"build": "tsc",
-		"prepare": "npm run build",
-		"test": "vitest run",
-		"test:watch": "vitest",
-		"test:coverage": "vitest run --coverage",
-		"test:integration": "vitest run --config vitest.config.integration.ts"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/f/fatura.git"
-	},
-	"keywords": [
-		"fatura",
-		"gib",
-		"efatura",
-		"earsiv"
-	],
-	"author": "Fatih Kadir Akın <fatihkadirakin@gmail.com>",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/f/fatura/issues"
-	},
-	"homepage": "https://github.com/f/fatura#readme"
+    "name": "fatura",
+    "version": "0.2.0",
+    "description": "GİB eFatura.gov.tr Fatura Oluşturucu",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist/",
+        "declarations/"
+    ],
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "dependencies": {
+        "number-to-text": "^0.3.8",
+        "uuid": "^9.0.0"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@types/node": "^20.0.0",
+        "@types/uuid": "^9.0.0",
+        "@vitest/coverage-v8": "^4.1.2",
+        "eslint": "^10.2.0",
+        "eslint-config-prettier": "^10.1.8",
+        "globals": "^17.4.0",
+        "prettier": "^3.8.1",
+        "typescript": "^5.4.0",
+        "typescript-eslint": "^8.58.0",
+        "vitest": "^4.1.2"
+    },
+    "scripts": {
+        "build": "tsc",
+        "prepare": "npm run build",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage",
+        "test:integration": "vitest run --config vitest.config.integration.ts",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/f/fatura.git"
+    },
+    "keywords": [
+        "fatura",
+        "gib",
+        "efatura",
+        "earsiv"
+    ],
+    "author": "Fatih Kadir Akın <fatihkadirakin@gmail.com>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/f/fatura/issues"
+    },
+    "homepage": "https://github.com/f/fatura#readme"
 }

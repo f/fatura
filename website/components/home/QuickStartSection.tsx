@@ -13,20 +13,23 @@ const quickStart = `npm install fatura\n\nimport { createFaturaClient } from "fa
 })`;
 
 export async function QuickStartSection() {
-  return (
-    <section className="section-block" style={{ marginTop: "1rem" }}>
-      <h2 className="section-title" style={{ fontSize: "clamp(1.4rem, 4vw, 2rem)" }}>
-        Hızlı başlangıç
-      </h2>
-      <p className="text-muted" style={{ marginTop: "0.6rem", marginBottom: "1rem" }}>
-        Üç adımda kurulumu bitirip ilk taslak faturayı oluşturabilirsiniz.
-      </p>
-      <ol className="text-muted" style={{ marginBottom: "1rem", paddingLeft: "1rem", display: "grid", gap: "0.4rem" }}>
-        <li>Paketi kurun.</li>
-        <li>İstemciyi TEST veya PROD ortamıyla oluşturun.</li>
-        <li>Token alıp taslak faturayı oluşturun.</li>
-      </ol>
-      <CodeBlock code={quickStart} lang="ts" title="quick-start.ts" />
-    </section>
-  );
+    return (
+        <section className="section-block" style={{ marginTop: "1rem" }}>
+            <h2 className="section-title" style={{ fontSize: "clamp(1.4rem, 4vw, 2rem)" }}>
+                Hızlı başlangıç
+            </h2>
+            <p className="text-muted" style={{ marginTop: "0.6rem", marginBottom: "1rem" }}>
+                Üç adımda kurulumu bitirip ilk taslak faturayı oluşturabilirsiniz.
+            </p>
+            <ol
+                className="text-muted"
+                style={{ marginBottom: "1rem", paddingLeft: "1rem", display: "grid", gap: "0.4rem" }}
+            >
+                <li>Paketi kurun.</li>
+                <li>İstemciyi TEST veya PROD ortamıyla oluşturun.</li>
+                <li>Token alıp taslak faturayı oluşturun.</li>
+            </ol>
+            <CodeBlock code={quickStart} lang="ts" title="quick-start.ts" />
+        </section>
+    );
 }
