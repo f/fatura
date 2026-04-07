@@ -5,6 +5,7 @@ import { COMMANDS } from "./constants/commands";
 import type {
   EnvironmentKey,
   ApiResponse,
+  GibAuthResponse,
   InvoiceListItem,
   InvoiceItem,
   InvoiceDetails,
@@ -13,6 +14,20 @@ import type {
   UserData,
   RawUserData,
 } from "./types";
+
+/** GİB API hata mesajını okur ve varsa Error fırlatır. */
+function assertApiSuccess(response: ApiResponse | GibAuthResponse): void {
+  if (response.error && response.error !== "0") {
+    const raw = response.messages?.[0];
+    const text =
+      typeof raw === "string"
+        ? raw
+        : typeof raw === "object" && raw !== null
+        ? raw.text
+        : "GİB API hatası";
+    throw new Error(text ?? "GİB API hatası");
+  }
+}
 
 // ─── Internal types ──────────────────────────────────────────────────────────
 
@@ -93,7 +108,9 @@ export class FaturaClient {
         )}`,
       }
     );
-    return response.json() as Promise<T>;
+    const json = (await response.json()) as ApiResponse;
+    assertApiSuccess(json);
+    return json as T;
   }
 
   // ─── Auth ──────────────────────────────────────────────────────────────────
@@ -107,11 +124,12 @@ export class FaturaClient {
         body: `assoscmd=${this.loginCmd}&rtype=json&userid=${userName}&sifre=${password}&sifre2=${password}&parola=1&`,
       }
     );
-    const json = (await response.json()) as { token: string };
-    return json.token;
+    const json = (await response.json()) as GibAuthResponse;
+    assertApiSuccess(json);
+    return json.token!;
   }
 
-  async logout(token: string): Promise<string> {
+  async logout(token: string): Promise<unknown> {
     const response = await fetch(
       `${this.baseURL}/earsiv-services/assos-login`,
       {
@@ -120,7 +138,7 @@ export class FaturaClient {
         body: `assoscmd=${this.logoutCmd}&rtype=json&token=${token}&`,
       }
     );
-    const json = (await response.json()) as { data: string };
+    const json = (await response.json()) as GibAuthResponse;
     return json.data;
   }
 
