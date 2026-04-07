@@ -1,40 +1,42 @@
-# On release: install deps, build, test, then publish to the npm registry.
+# On release: type-check, test, then build and publish dist/ to the npm registry.
 # Requires repository secret: npm_token (npm automation/access token).
 
 name: Publish npm package
 
 on:
-  release:
-    types: [created]
+    release:
+        types: [created]
 
 permissions:
-  contents: read
+    contents: read
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-      - run: npm ci
-      - run: npm run build
-      - run: npm test
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: npm
+            - run: npm ci
+            - run: npx tsc --noEmit
+            - run: npm test
+              env:
+                  CI: "true"
 
-  publish-npm:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          registry-url: https://registry.npmjs.org/
-          cache: npm
-      - run: npm ci
-      - run: npm run build
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+    publish-npm:
+        needs: test
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  registry-url: https://registry.npmjs.org/
+                  cache: npm
+            - run: npm ci
+            - run: npm run build
+            - run: npm publish
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
