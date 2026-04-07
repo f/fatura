@@ -35,12 +35,15 @@ Oldukça kolay bir kullanıma sahiptir:
 Bu method ile fatura oluşturulup imzalanır ve indirme adresi döner.
 
 ```js
-const fatura = require('fatura')
+const { createFaturaClient } = require('fatura')
 
-const faturaURL = await fatura.createInvoiceAndGetDownloadURL(
-    'GIB Kullanıcı Adı', 
-    'GIB Parolası', {
-        ... faturaDetayları
+const client = createFaturaClient()
+
+const faturaURL = await client.createInvoiceAndGetDownloadURL(
+    'GIB Kullanıcı Adı',
+    'GIB Parolası',
+    {
+        ...faturaDetayları,
     },
     // Varsayılan olarak sign: true gönderilir.
     { sign: false }
@@ -52,12 +55,15 @@ const faturaURL = await fatura.createInvoiceAndGetDownloadURL(
 Bu method ile fatura oluşturulup imzalanır ve fatura HTML'i döner. Bu HTML'i `iframe` içerisinde gösterip yazdırılmasını sağlayabilirsiniz.
 
 ```js
-const fatura = require('fatura')
+const { createFaturaClient } = require('fatura')
 
-const faturaHTML = await fatura.createInvoiceAndGetHTML(
-    'GIB Kullanıcı Adı', 
-    'GIB Parolası', {
-        ... faturaDetayları
+const client = createFaturaClient()
+
+const faturaHTML = await client.createInvoiceAndGetHTML(
+    'GIB Kullanıcı Adı',
+    'GIB Parolası',
+    {
+        ...faturaDetayları,
     },
     // Varsayılan olarak sign: true gönderilir.
     { sign: false }
