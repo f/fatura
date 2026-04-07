@@ -35,7 +35,7 @@ describe("FaturaClient — invoice operations", () => {
         it("auto-generates a UUID when none is provided", async () => {
             mockFetchOnce({ data: "ok" });
             const result = await client.createDraftInvoice(TOKEN, minimalInvoice);
-            expect(result.uuid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-1[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+            expect(result.uuid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
         });
 
         it("uses the UUID provided in invoiceDetails", async () => {

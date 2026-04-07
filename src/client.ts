@@ -1,4 +1,4 @@
-import { v1 as uuidv1 } from "uuid";
+import { randomUUID } from "crypto";
 import { convertPriceToText } from "./utils/number";
 import { ENV } from "./constants/environment";
 import { COMMANDS } from "./constants/commands";
@@ -97,7 +97,7 @@ export class FaturaClient {
         const response = await fetch(`${this.baseURL}/earsiv-services/dispatch`, {
             method: "POST",
             headers: this.buildHeaders(),
-            body: `cmd=${command}&callid=${uuidv1()}&pageName=${pageName}&token=${token}&jp=${encodeURIComponent(
+            body: `cmd=${command}&callid=${randomUUID()}&pageName=${pageName}&token=${token}&jp=${encodeURIComponent(
                 JSON.stringify(data),
             )}`,
         });
@@ -132,7 +132,7 @@ export class FaturaClient {
     // ─── Invoice CRUD ──────────────────────────────────────────────────────────
 
     async createDraftInvoice(token: string, invoiceDetails: InvoiceDetails): Promise<DraftInvoice> {
-        const faturaUuid = invoiceDetails.uuid ?? uuidv1();
+        const faturaUuid = invoiceDetails.uuid ?? randomUUID();
         const invoiceData: Record<string, unknown> = {
             faturaUuid,
             belgeNumarasi: invoiceDetails.documentNumber ?? "",
