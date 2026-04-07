@@ -28,7 +28,7 @@
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"test:coverage": "vitest run --coverage",
-		"test:integration": "vitest run tests/integration"
+		"test:integration": "vitest run --config vitest.config.integration.ts"
 	},
 	"repository": {
 		"type": "git",
