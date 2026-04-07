@@ -26,7 +26,29 @@ eArşiv sistemi üzerinde fatura oluşturmanızı sağlar.
 npm install fatura
 ```
 
+**Node.js 18 veya üzeri** gereklidir (`package.json` içinde `engines`).
+
 ## Kullanım
+
+Tüm işlemler bir **`FaturaClient`** örneği üzerinden yapılır. Üretim (canlı GİB) için:
+
+```js
+const { createFaturaClient } = require("fatura");
+const client = createFaturaClient(); // varsayılan: PROD
+```
+
+**Test ortamı** (`https://earsivportaltest.efatura.gov.tr`):
+
+```js
+const client = createFaturaClient("TEST");
+```
+
+ES modülü:
+
+```js
+import { createFaturaClient } from "fatura";
+const client = createFaturaClient();
+```
 
 Oldukça kolay bir kullanıma sahiptir:
 
@@ -72,27 +94,22 @@ const faturaHTML = await client.createInvoiceAndGetHTML(
 
 ---
 
-## Diğer Fonksiyonlar
+## Diğer metodlar (`client` üzerinde)
 
-Muhtemelen pek gerekmeyecek diğer alt fonksiyonlar:
+Aşağıdakilerin tümü **`const client = createFaturaClient(...)`** ile oluşturduğunuz istemci üzerinde çağrılır.
 
-#### `enableTestMode()`
+#### `getToken(user, pass)`
 
-Bu fonksiyonu çağırdığınızda sistem **https://earsivportaltest.efatura.gov.tr** adresini kullanmaya geçer. Fakat burada sistem bazen dolu olabilir.
+**e-Arşiv Portal** oturumu için `token` döner.
 
-#### `getToken(user, pass): String`
+#### `createDraftInvoice(token, invoiceDetails)`
 
-**eFatura Portal**'ını kullanabileceğiniz `token`'ı döner.
+e-Arşiv’de önce **taslak** oluşturulur. Dönüş değerinde `uuid`, `date` ve GİB cevabı bulunur. `invoiceDetails` örnek şekli:
 
-#### `createDraftInvoice(token, invoiceDetails): Object`
-
-eFatura.gov.tr'de fatura direkt oluşmaz. Önce **Taslak** fatura oluşturmak gerekir. `createDraftInvoice` size taslak bir fatura oluşturacaktır. `invoiceDetails` parametresi aşağıdaki şekilde bir JavaScript nesnesi kabul eder:
-
-> ℹ️ UUID vermezseniz yeni bir UUID atanır.
+> ℹ️ `uuid` vermezseniz yeni bir UUID atanır.
 
 ```js
 {
-    // UUID vermezseniz yeni bir UUID yaratılacaktır.
     uuid: "4c72cb57-b72d-4812-ac48-0a0bce83e771",
 
     date: "08/02/2020",
@@ -105,50 +122,70 @@ eFatura.gov.tr'de fatura direkt oluşmaz. Önce **Taslak** fatura oluşturmak ge
     fullAddress: "X Sok. Y Cad. No: 3 Z Istanbul",
     items: [
         {
-        name: "Stickker",
-        quantity: 1,
-        unitPrice: 100,
-        price: 100,
-        VATRate: 18,
-        VATAmount: 18
-        }
+            name: "Stickker",
+            quantity: 1,
+            unitPrice: 100,
+            price: 100,
+            VATRate: 20,
+            VATAmount: 20,
+        },
     ],
-    totalVAT: 18,
+    totalVAT: 20,
     grandTotal: 100.0,
-    grandTotalInclVAT: 118.0,
-    paymentTotal: 118.0
+    grandTotalInclVAT: 120.0,
+    paymentTotal: 120.0,
 }
 ```
 
-#### `findInvoice(token, { date, uuid }): Object`
+#### `findInvoice(token, draftInvoice)`
 
-Her fatura için bir `uuid` oluşturulur. Bu `uuid` kullanılarak faturanın oluşturulduğu tarih içerisindeki taslak fatura bulunur ve getirilir. Bu veri içerisinde **imzalama** esnasında gerekecek **GIB Belge Numarası** bulunur. Bu method ile diğer taslak faturalara da erişebilirsiniz.
+`createDraftInvoice`’ın döndürdüğü **taslak nesnesi** (`date` + `uuid` içeren) verilir; ilgili gündeki taslaklar arasından eşleşen kayıt döner. **İmzalama** için gereken bilgiler (ör. belge numarası) bu nesnede yer alır.
 
-#### `getAllInvoicesByDateRange(token, { startDate, endDate }): Array`
+#### `getAllInvoicesByDateRange(token, { startDate, endDate })`
 
-İki tarih arasındaki tüm faturaları döner.
+İki tarih arasındaki **kesilen / taslak** listesi (GİB komutuna göre).
 
-#### `getAllInvoicesIssuedToMeByDateRange(token, { startDate, endDate }): Array`
+#### `getAllInvoicesIssuedToMeByDateRange(token, { startDate, endDate })`
 
-İki tarih arasındaki gelen faturaları (GİB'deki adıyla Adıma Düzenlenen Belgeleri) döner.
+İki tarih arasındaki **adıma düzenlenen** belgeler.
 
-#### `signDraftInvoice(token, draftInvoice): void`
+#### `signDraftInvoice(token, draftInvoice)`
 
-☢️ Fatura imzalama faturanın kesilmesi işlemidir ve **vergi sisteminde mali veri oluşturur.** Bu nedenle dikkatli kullanınız.
+☢️ İmzalama **kesilmiş sayılan mali işlem** oluşturur; dikkatli kullanın.
 
-`findDraftInvoice` methodu ile alınan veri `draftInvoice` parametresine gönderilerek bulunan faturanın imzalanması sağlanır.
+`findInvoice` ile bulunan **liste öğesi** (`draftInvoice` formatı) verilmelidir.
 
-#### `getDownloadURL(token, uuid): String`
+#### `getDownloadURL(token, invoiceUUID, { signed })`
 
-İmzalanmış faturaların efatura.gov.tr üzerinden indirme bağlantısını döner ve `.zip` formatında indirir. Bu dosya içerisinde `html` ve `xml` dosyaları bulunur.
+İndirme URL’si döner (`.zip` içinde HTML/XML olabilir). **`signed`**: fatura onaylı mı (`true` / `false`).
 
-#### `getInvoiceHTML(token, uuid): String`
+#### `getInvoiceHTML(token, uuid, { signed })`
 
-İmzalanmış faturaların efatura.gov.tr üzerinden HTML içerigini döner. Bu metni dosyaya kaydedebilir ya da `iframe` üzerinden yazdırılmasını sağlayabilirsiniz.
+Fatura HTML metni. **`signed`** imzalı/onaysız görünüm için kullanılır.
 
-#### `cancelDraftInvoice(token, reason, draftInvoice): String`
+#### `cancelDraftInvoice(token, reason, draftInvoice)`
 
-Taslak halindeki faturalar iptal edilebilir.
+Taslak iptali.
+
+#### `getRecipientDataByTaxIDOrTRID(token, taxIDOrTRID)`
+
+VKN/TCKN ile alıcı bilgisi sorgusu.
+
+#### `sendSignSMSCode` / `verifySignSMSCode`
+
+İmzaya ilişkin SMS doğrulama akışı (GİB kurallarına tabi).
+
+#### `getUserData` / `updateUserData`
+
+Portal kullanıcı bilgilerini okuma / güncelleme.
+
+#### `createInvoice(user, pass, invoiceDetails, { sign })`
+
+Token alır, taslak oluşturur, bulur; `sign: true` (varsayılan) ise imzalar. `findInvoice` sonuç vermezse imza atlanır.
+
+#### `logout(token)`
+
+Oturum kapatma; GİB cevabına göre dönüş tipi değişebilir.
 
 ## Lisans
 
