@@ -1,0 +1,251 @@
+---
+title: TypeScript tipleri
+description: Paketten dışarıya açılan ana tiplerin özeti
+order: 110
+group: Tipler
+---
+
+## EnvironmentKey
+
+```ts
+export type EnvironmentKey = "PROD" | "TEST";
+```
+
+## EnvConfig
+
+```ts
+export interface EnvConfig {
+    BASE_URL: string;
+}
+```
+
+## GibApiMessage
+
+```ts
+export type GibApiMessage = string | { type: string; text: string };
+```
+
+## ApiResponse
+
+```ts
+export interface ApiResponse<T = unknown> {
+    data: T;
+    oid?: string;
+    token?: string;
+    error?: string;
+    messages?: GibApiMessage[];
+}
+```
+
+## GibAuthResponse
+
+```ts
+export interface GibAuthResponse {
+    token?: string;
+    data?: { redirectUrl: string } | string | unknown;
+    error?: string;
+    messages?: GibApiMessage[];
+}
+```
+
+## InvoiceListItem
+
+```ts
+export interface InvoiceListItem {
+    ettn: string;
+    faturaTarihi: string;
+    aliciUnvan?: string;
+    aliciAdi?: string;
+    aliciSoyadi?: string;
+    belgeTuru?: string;
+    onayDurumu?: string;
+    [key: string]: unknown;
+}
+```
+
+## InvoiceItem
+
+```ts
+export interface InvoiceItem {
+    name: string;
+    quantity?: number;
+    unitType?: string;
+    unitPrice?: number;
+    price: number;
+    discountRate?: number;
+    discountAmount?: number;
+    discountReason?: string;
+    discount?: string;
+    VATRate?: number;
+    VATAmount?: number;
+    VATAmountOfTax?: number;
+    taxRate?: number;
+}
+```
+
+## InvoiceDetails
+
+```ts
+export interface InvoiceDetails {
+    uuid?: string;
+    documentNumber?: string;
+    date: string;
+    time: string;
+    invoiceType?: string;
+    hangiTip?: string;
+    currency?: string;
+    currencyRate?: string;
+    orderNumber?: string;
+    orderDate?: string;
+    dispatchNumber?: string;
+    dispatchDate?: string;
+    slipNumber?: string;
+    slipDate?: string;
+    slipTime?: string;
+    slipType?: string;
+    zReportNumber?: string;
+    okcSerialNumber?: string;
+    taxIDOrTRID?: string;
+    title?: string;
+    name?: string;
+    surname?: string;
+    fullAddress?: string;
+    buildingName?: string;
+    buildingNumber?: string;
+    doorNumber?: string;
+    town?: string;
+    district?: string;
+    city?: string;
+    country?: string;
+    zipCode?: string;
+    phoneNumber?: string;
+    faxNumber?: string;
+    email?: string;
+    webSite?: string;
+    taxOffice?: string;
+    taxType?: string;
+    commissionRate?: number;
+    freightRate?: number;
+    hammaliyeOrani?: number;
+    nakliyeOrani?: number;
+    komisyonTutari?: string;
+    navlunTutari?: string;
+    hammaliyeTutari?: string;
+    nakliyeTutari?: string;
+    komisyonKDVOrani?: number;
+    navlunKDVOrani?: number;
+    hammaliyeKDVOrani?: number;
+    nakliyeKDVOrani?: number;
+    komisyonKDVTutari?: string;
+    navlunKDVTutari?: string;
+    hammaliyeKDVTutari?: string;
+    nakliyeKDVTutari?: string;
+    gelirVergisiOrani?: number;
+    bagkurTevkifatiOrani?: number;
+    gelirVergisiTevkifatiTutari?: string;
+    bagkurTevkifatiTutari?: string;
+    halRusumuOrani?: number;
+    halRusumuTutari?: string;
+    halRusumuKDVOrani?: number;
+    halRusumuKDVTutari?: string;
+    ticaretBorsasiOrani?: number;
+    ticaretBorsasiTutari?: string;
+    ticaretBorsasiKDVOrani?: number;
+    ticaretBorsasiKDVTutari?: string;
+    milliSavunmaFonuOrani?: number;
+    milliSavunmaFonuTutari?: string;
+    milliSavunmaFonuKDVOrani?: number;
+    milliSavunmaFonuKDVTutari?: string;
+    digerOrani?: number;
+    digerTutari?: string;
+    digerKDVOrani?: number;
+    digerKDVTutari?: string;
+    specialTaxBaseAmount?: string;
+    specialTaxBaseRate?: number;
+    specialTaxBaseTaxAmount?: number;
+    toplamMasraflar?: string;
+    grandTotal: number;
+    totalDiscount?: number;
+    totalVAT: number;
+    grandTotalInclVAT: number;
+    paymentTotal: number;
+    items: InvoiceItem[];
+    returnItems?: unknown[];
+}
+```
+
+## DraftInvoice
+
+```ts
+export interface DraftInvoice {
+    date: string;
+    uuid: string;
+    [key: string]: unknown;
+}
+```
+
+## CreateInvoiceResult
+
+```ts
+export interface CreateInvoiceResult {
+    token: string;
+    uuid: string;
+    signed: boolean;
+}
+```
+
+## UserData
+
+```ts
+export interface UserData {
+    taxIDOrTRID: string;
+    title: string;
+    name: string;
+    surname: string;
+    registryNo?: string;
+    mersisNo?: string;
+    taxOffice?: string;
+    fullAddress?: string;
+    buildingName?: string;
+    buildingNumber?: string;
+    doorNumber?: string;
+    town?: string;
+    district?: string;
+    city?: string;
+    zipCode?: string;
+    country?: string;
+    phoneNumber?: string;
+    faxNumber?: string;
+    email?: string;
+    webSite?: string;
+    businessCenter?: string;
+}
+```
+
+## RawUserData
+
+```ts
+export interface RawUserData {
+    vknTckn: string;
+    unvan: string;
+    ad: string;
+    soyad: string;
+    sicilNo?: string;
+    mersisNo?: string;
+    vergiDairesi?: string;
+    cadde?: string;
+    apartmanAdi?: string;
+    apartmanNo?: string;
+    kapiNo?: string;
+    kasaba?: string;
+    ilce?: string;
+    il?: string;
+    postaKodu?: string;
+    ulke?: string;
+    telNo?: string;
+    faksNo?: string;
+    ePostaAdresi?: string;
+    webSitesiAdresi?: string;
+    isMerkezi?: string;
+}
+```

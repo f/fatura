@@ -1,0 +1,22 @@
+---
+title: Fatura indirme ve görüntüleme
+description: HTML alma ve ZIP indirme bağlantısı üretme
+order: 60
+group: Fatura akışları
+---
+
+## getInvoiceHTML
+
+```ts
+getInvoiceHTML(token: string, uuid: string, options: { signed: boolean }): Promise<string>
+```
+
+İmzalı veya taslak faturanın HTML çıktısını döndürür.
+
+## getDownloadURL
+
+```ts
+getDownloadURL(token: string, invoiceUUID: string, options: { signed: boolean }): string
+```
+
+GİB indirme uç noktasına yönlendiren bağlantıyı metin olarak döndürür.

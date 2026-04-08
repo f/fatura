@@ -1,0 +1,39 @@
+---
+title: Yardımcı metotlar
+description: Tek çağrıda fatura oluşturan üst seviye metotlar
+order: 100
+group: Yardımcı akışlar
+---
+
+## createInvoice
+
+```ts
+createInvoice(
+  userId: string,
+  password: string,
+  invoiceDetails: InvoiceDetails,
+  options?: { sign?: boolean }
+): Promise<CreateInvoiceResult>
+```
+
+## createInvoiceAndGetDownloadURL
+
+```ts
+createInvoiceAndGetDownloadURL(
+  userId: string,
+  password: string,
+  invoiceDetails: InvoiceDetails,
+  options?: { sign?: boolean }
+): Promise<string>
+```
+
+## createInvoiceAndGetHTML
+
+```ts
+createInvoiceAndGetHTML(
+  userId: string,
+  password: string,
+  invoiceDetails: InvoiceDetails,
+  options?: { sign?: boolean }
+): Promise<string>
+```

@@ -1,0 +1,22 @@
+---
+title: Kullanıcı yönetimi
+description: Profil verisini alma ve güncelleme
+order: 70
+group: Hesap
+---
+
+## getUserData
+
+```ts
+getUserData(token: string): Promise<UserData>
+```
+
+Portal profil verisini `UserData` tipine dönüştürerek döndürür.
+
+## updateUserData
+
+```ts
+updateUserData(token: string, userData: UserData): Promise<unknown>
+```
+
+Profil alanlarını GİB tarafına kaydeder.

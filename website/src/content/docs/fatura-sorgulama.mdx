@@ -1,0 +1,26 @@
+---
+title: Fatura sorgulama
+description: Tarih aralığına göre giden ve gelen faturalar
+order: 50
+group: Fatura akışları
+---
+
+## getAllInvoicesByDateRange
+
+```ts
+getAllInvoicesByDateRange(
+  token: string,
+  range: { startDate: string; endDate: string }
+): Promise<InvoiceListItem[]>
+```
+
+## getAllInvoicesIssuedToMeByDateRange
+
+```ts
+getAllInvoicesIssuedToMeByDateRange(
+  token: string,
+  range: { startDate: string; endDate: string }
+): Promise<InvoiceListItem[]>
+```
+
+Her iki metot da `GG/AA/YYYY` biçiminde tarih bekler.

@@ -1,0 +1,28 @@
+# Her PR ve ana dala push’ta tip kontrolü, test ve ESLint.
+
+name: CI
+
+on:
+    pull_request:
+        branches: [main, master]
+    push:
+        branches: [main, master]
+
+permissions:
+    contents: read
+
+jobs:
+    test-and-lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: npm
+            - run: npm ci
+            - run: npx tsc --noEmit
+            - run: npm test
+              env:
+                  CI: "true"
+            - run: npm run lint
