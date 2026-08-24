@@ -57,7 +57,7 @@ interface CreateInvoiceOptions {
 interface SmsResponse {
     oid?: string;
     /** GİB `oid`'yi `data` içinde döndürür; üst seviye alan yedek olarak okunur. */
-    data?: { oid?: string };
+    data?: { oid?: string; sonuc?: string | number };
 }
 
 interface PhoneResponse {
@@ -451,20 +451,23 @@ export class FaturaClient {
      *
      * `OPR: 1` ve `DATA` alanları zorunludur: bunlar olmadan GİB SMS kodunu
      * doğrular ama hiçbir faturayı imzalamaz.
+     *
+     * @returns GİB faturaları imzaladıysa `true` (`data.sonuc === "1"`).
      */
     async verifySignSMSCode(
         token: string,
         smsCode: string,
         operationId: string,
         invoices: InvoiceListItem[] = [],
-    ): Promise<string | undefined> {
+    ): Promise<boolean> {
         const result = await this.runCommand<SmsResponse>(token, ...COMMANDS.verifySMSCode, {
             SIFRE: smsCode,
             OID: operationId,
             OPR: 1,
             DATA: invoices,
         });
-        return result.data?.oid ?? result.oid;
+        // GİB sonucu `data.sonuc` alanında bildirir: "1" imzalandı demektir.
+        return String(result.data?.sonuc ?? "") === "1";
     }
 
     // ─── High-level composite ──────────────────────────────────────────────────

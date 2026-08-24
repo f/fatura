@@ -8,7 +8,12 @@ export const COMMANDS = {
     getRecipientDataByTaxIDOrTRID: ["SICIL_VEYA_MERNISTEN_BILGILERI_GETIR", "RG_BASITFATURA"],
     getSignPhoneNumber: ["EARSIV_PORTAL_TELEFONNO_SORGULA", "RG_SMSONAY"],
     sendSignSMSCode: ["EARSIV_PORTAL_SMSSIFRE_GONDER", "RG_SMSONAY"],
-    verifySMSCode: ["EARSIV_PORTAL_SMSSIFRE_DOGRULA", "RG_SMSONAY"],
+    /**
+     * İmzalama komutu. GİB bu servisi okunabilir addan opak bir kimliğe taşıdı;
+     * `EARSIV_PORTAL_SMSSIFRE_DOGRULA` canlı portalda
+     * "Service Not Found" döner.
+     */
+    verifySMSCode: ["0lhozfib5410mp", "RG_SMSONAY"],
     getUserData: ["EARSIV_PORTAL_KULLANICI_BILGILERI_GETIR", "RG_KULLANICI"],
     updateUserData: ["EARSIV_PORTAL_KULLANICI_BILGILERI_KAYDET", "RG_KULLANICI"],
 } as const;

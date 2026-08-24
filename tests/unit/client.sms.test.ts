@@ -109,77 +109,67 @@ describe("FaturaClient — SMS verification", () => {
         const SMS_CODE = "123456";
         const OPERATION_ID = "operation-id-xyz";
 
-        it("sends the correct GIB command", async () => {
-            mockFetchOnce({ oid: OPERATION_ID });
+        it("[BUG FIX] uses the opaque signing command id, not EARSIV_PORTAL_SMSSIFRE_DOGRULA", async () => {
+            // Canlı portal EARSIV_PORTAL_SMSSIFRE_DOGRULA için "Service Not Found" döner.
+            mockFetchOnce({ data: { sonuc: "1" } });
             await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID);
-            expect(getFetchCall().cmd).toBe("EARSIV_PORTAL_SMSSIFRE_DOGRULA");
+            expect(getFetchCall().cmd).toBe("0lhozfib5410mp");
         });
 
         it("sends the correct pageName", async () => {
-            mockFetchOnce({ oid: OPERATION_ID });
+            mockFetchOnce({ data: { sonuc: "1" } });
             await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID);
             expect(getFetchCall().pageName).toBe("RG_SMSONAY");
         });
 
         it("sends the SMS code as SIFRE", async () => {
-            mockFetchOnce({ oid: OPERATION_ID });
+            mockFetchOnce({ data: { sonuc: "1" } });
             await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID);
             expect(getFetchCall().jp["SIFRE"]).toBe(SMS_CODE);
         });
 
         it("sends the operation ID as OID", async () => {
-            mockFetchOnce({ oid: OPERATION_ID });
+            mockFetchOnce({ data: { sonuc: "1" } });
             await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID);
             expect(getFetchCall().jp["OID"]).toBe(OPERATION_ID);
         });
 
-        it("returns the oid from the response", async () => {
-            mockFetchOnce({ oid: "confirmed-op-id" });
-            const result = await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID);
-            expect(result).toBe("confirmed-op-id");
+        it("[BUG FIX] returns true when GİB reports sonuc=1", async () => {
+            mockFetchOnce({ data: { sonuc: "1" } });
+            expect(await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID)).toBe(true);
         });
 
-        it("returns undefined when oid is absent", async () => {
+        it("[BUG FIX] returns false when GİB does not report sonuc=1", async () => {
+            mockFetchOnce({ data: { sonuc: "0" } });
+            expect(await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID)).toBe(false);
+        });
+
+        it("returns false when the response has no sonuc field", async () => {
             mockFetchOnce({});
-            const result = await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID);
-            expect(result).toBeUndefined();
-        });
-
-        it("[BUG FIX] uses EARSIV_PORTAL_SMSSIFRE_DOGRULA (not a non-existent key)", async () => {
-            // In the original JS, COMMANDS.verifySignSMSCode was used — that key did not
-            // exist in COMMANDS. The correct key is verifySMSCode → EARSIV_PORTAL_SMSSIFRE_DOGRULA.
-            mockFetchOnce({ oid: "x" });
-            await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID);
-            expect(getFetchCall().cmd).toBe("EARSIV_PORTAL_SMSSIFRE_DOGRULA");
+            expect(await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID)).toBe(false);
         });
 
         it("[BUG FIX] sends OPR=1 — without it GİB verifies the code but signs nothing", async () => {
-            mockFetchOnce({ oid: "x" });
+            mockFetchOnce({ data: { sonuc: "1" } });
             await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID);
             expect(getFetchCall().jp["OPR"]).toBe(1);
         });
 
         it("[BUG FIX] sends the invoices to be signed as DATA", async () => {
             const invoices = [{ ettn: "ettn-1" }, { ettn: "ettn-2" }];
-            mockFetchOnce({ oid: "x" });
+            mockFetchOnce({ data: { sonuc: "1" } });
             await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID, invoices);
             expect(getFetchCall().jp["DATA"]).toEqual(invoices);
         });
 
         it("sends DATA as an empty array when no invoice is given", async () => {
-            mockFetchOnce({ oid: "x" });
+            mockFetchOnce({ data: { sonuc: "1" } });
             await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID);
             expect(getFetchCall().jp["DATA"]).toEqual([]);
         });
 
-        it("[BUG FIX] reads oid from response.data.oid", async () => {
-            mockFetchOnce({ data: { oid: "data-icindeki-oid" } });
-            const result = await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID);
-            expect(result).toBe("data-icindeki-oid");
-        });
-
         it("uses a different command than sendSignSMSCode", async () => {
-            mockFetchOnce({ oid: "x" });
+            mockFetchOnce({ data: { sonuc: "1" } });
             await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID);
             expect(getFetchCall().cmd).not.toBe("EARSIV_PORTAL_SMSSIFRE_GONDER");
         });
