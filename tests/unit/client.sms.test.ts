@@ -63,6 +63,12 @@ describe("FaturaClient — SMS verification", () => {
             await client.sendSignSMSCode(TOKEN, PHONE);
             expect(getFetchCall().token).toBe(TOKEN);
         });
+
+        it("[BUG FIX] reads oid from response.data.oid", async () => {
+            mockFetchOnce({ data: { oid: "data-icindeki-oid" } });
+            const result = await client.sendSignSMSCode(TOKEN, PHONE);
+            expect(result).toBe("data-icindeki-oid");
+        });
     });
 
     // ─── verifySignSMSCode ────────────────────────────────────────────────────
@@ -113,6 +119,31 @@ describe("FaturaClient — SMS verification", () => {
             mockFetchOnce({ oid: "x" });
             await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID);
             expect(getFetchCall().cmd).toBe("EARSIV_PORTAL_SMSSIFRE_DOGRULA");
+        });
+
+        it("[BUG FIX] sends OPR=1 — without it GİB verifies the code but signs nothing", async () => {
+            mockFetchOnce({ oid: "x" });
+            await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID);
+            expect(getFetchCall().jp["OPR"]).toBe(1);
+        });
+
+        it("[BUG FIX] sends the invoices to be signed as DATA", async () => {
+            const invoices = [{ ettn: "ettn-1" }, { ettn: "ettn-2" }];
+            mockFetchOnce({ oid: "x" });
+            await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID, invoices);
+            expect(getFetchCall().jp["DATA"]).toEqual(invoices);
+        });
+
+        it("sends DATA as an empty array when no invoice is given", async () => {
+            mockFetchOnce({ oid: "x" });
+            await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID);
+            expect(getFetchCall().jp["DATA"]).toEqual([]);
+        });
+
+        it("[BUG FIX] reads oid from response.data.oid", async () => {
+            mockFetchOnce({ data: { oid: "data-icindeki-oid" } });
+            const result = await client.verifySignSMSCode(TOKEN, SMS_CODE, OPERATION_ID);
+            expect(result).toBe("data-icindeki-oid");
         });
 
         it("uses a different command than sendSignSMSCode", async () => {

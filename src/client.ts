@@ -56,6 +56,8 @@ interface CreateInvoiceOptions {
 
 interface SmsResponse {
     oid?: string;
+    /** GİB `oid`'yi `data` içinde döndürür; üst seviye alan yedek olarak okunur. */
+    data?: { oid?: string };
 }
 
 interface MalHizmetRow {
@@ -423,15 +425,30 @@ export class FaturaClient {
             KCEPTEL: false,
             TIP: "",
         });
-        return result.oid;
+        return result.data?.oid ?? result.oid;
     }
 
-    async verifySignSMSCode(token: string, smsCode: string, operationId: string): Promise<string | undefined> {
+    /**
+     * SMS kodunu doğrular **ve `invoices` listesindeki faturaları imzalar**.
+     *
+     * ☢️ İmzalama mali işlem oluşturur.
+     *
+     * `OPR: 1` ve `DATA` alanları zorunludur: bunlar olmadan GİB SMS kodunu
+     * doğrular ama hiçbir faturayı imzalamaz.
+     */
+    async verifySignSMSCode(
+        token: string,
+        smsCode: string,
+        operationId: string,
+        invoices: InvoiceListItem[] = [],
+    ): Promise<string | undefined> {
         const result = await this.runCommand<SmsResponse>(token, ...COMMANDS.verifySMSCode, {
             SIFRE: smsCode,
             OID: operationId,
+            OPR: 1,
+            DATA: invoices,
         });
-        return result.oid;
+        return result.data?.oid ?? result.oid;
     }
 
     // ─── High-level composite ──────────────────────────────────────────────────
