@@ -63,3 +63,21 @@ export interface FetchCallSnapshot {
     /** Decoded `jp` JSON payload */
     jp: Record<string, unknown>;
 }
+
+/** GİB'in taslak oluşturma başarı mesajı. */
+export const GIB_DRAFT_CREATED =
+    "Faturanız başarıyla oluşturulmuştur. Düzenlenen Belgeler menüsünden faturanıza ulaşabilirsiniz.";
+
+/**
+ * `createDraftInvoice` üç fetch çağrısı yapar:
+ *   0 → taslak listesi (oluşturmadan önce)
+ *   1 → EARSIV_PORTAL_FATURA_OLUSTUR
+ *   2 → taslak listesi (oluşturmadan sonra, yeni ETTN'i bulmak için)
+ */
+export const CREATE_CALL = 1;
+
+export function mockDraftCreation(created: unknown = { ettn: "gib-atanan-ettn" }, existing: unknown[] = []): void {
+    mockFetchOnce({ data: existing });
+    mockFetchOnce({ data: GIB_DRAFT_CREATED });
+    mockFetchOnce({ data: [...existing, created] });
+}

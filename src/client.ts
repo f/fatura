@@ -25,6 +25,20 @@ function assertApiSuccess(response: ApiResponse | GibAuthResponse): void {
     }
 }
 
+/**
+ * GİB taslak oluşturma cevabını doğrular.
+ *
+ * `EARSIV_PORTAL_FATURA_OLUSTUR` hata durumunda da `error` alanı göndermez;
+ * sonucu yalnızca `data` içindeki serbest metinden anlaşılır. Bu yüzden
+ * `assertApiSuccess` bu komut için yeterli değildir.
+ */
+function assertDraftCreated(response: ApiResponse): void {
+    const text = typeof response.data === "string" ? response.data : "";
+    if (!/başarıyla oluşturulmuştur/i.test(text)) {
+        throw new Error(text || "GİB taslak faturayı oluşturmadı");
+    }
+}
+
 // ─── Internal types ──────────────────────────────────────────────────────────
 
 interface DateRange {
@@ -42,6 +56,12 @@ interface CreateInvoiceOptions {
 
 interface SmsResponse {
     oid?: string;
+    /** GİB `oid`'yi `data` içinde döndürür; üst seviye alan yedek olarak okunur. */
+    data?: { oid?: string; sonuc?: string | number };
+}
+
+interface PhoneResponse {
+    data?: { telefon?: string };
 }
 
 interface MalHizmetRow {
@@ -132,9 +152,10 @@ export class FaturaClient {
     // ─── Invoice CRUD ──────────────────────────────────────────────────────────
 
     async createDraftInvoice(token: string, invoiceDetails: InvoiceDetails): Promise<DraftInvoice> {
-        const faturaUuid = invoiceDetails.uuid ?? generateUUID();
         const invoiceData: Record<string, unknown> = {
-            faturaUuid,
+            // GİB ETTN'i sunucu tarafında üretir; istemciden gelen bir UUID
+            // "Ettn ya eksik ya boş ya da 36 uzunluk sınırına uymuyor." hatası verir.
+            faturaUuid: "",
             belgeNumarasi: invoiceDetails.documentNumber ?? "",
             faturaTarihi: invoiceDetails.date,
             saat: invoiceDetails.time,
@@ -241,9 +262,33 @@ export class FaturaClient {
             not: convertPriceToText(invoiceDetails.paymentTotal),
         };
 
-        const invoice = await this.runCommand<ApiResponse>(token, ...COMMANDS.createDraftInvoice, invoiceData);
+        // ETTN sunucu tarafında atandığı için, oluşturmadan önce/sonra o güne ait
+        // taslak listesi karşılaştırılarak yeni kayıt bulunur.
+        const before = new Set(
+            (
+                await this.getAllInvoicesByDateRange(token, {
+                    startDate: invoiceDetails.date,
+                    endDate: invoiceDetails.date,
+                })
+            ).map((item) => item.ettn),
+        );
 
-        return { date: invoiceDetails.date, uuid: faturaUuid, ...invoice };
+        const invoice = await this.runCommand<ApiResponse>(token, ...COMMANDS.createDraftInvoice, invoiceData);
+        assertDraftCreated(invoice);
+
+        const after = await this.getAllInvoicesByDateRange(token, {
+            startDate: invoiceDetails.date,
+            endDate: invoiceDetails.date,
+        });
+        const created = after.find((item) => !before.has(item.ettn));
+
+        return {
+            date: invoiceDetails.date,
+            uuid: created?.ettn ?? "",
+            documentNumber: created?.belgeNumarasi,
+            listItem: created,
+            ...invoice,
+        };
     }
 
     async findInvoice(token: string, draftInvoice: DraftInvoice): Promise<InvoiceListItem | undefined> {
@@ -378,21 +423,51 @@ export class FaturaClient {
 
     // ─── SMS ───────────────────────────────────────────────────────────────────
 
+    /**
+     * İmza SMS'inin gönderileceği **kayıtlı** cep telefonunu döner.
+     *
+     * e-Arşiv portalı SMS'i şirket yetkilisinin sisteme kayıtlı numarasına
+     * gönderir; numara dışarıdan verilmez. `sendSignSMSCode` çağrılmadan önce
+     * numara buradan alınmalıdır.
+     */
+    async getSignPhoneNumber(token: string): Promise<string | undefined> {
+        const result = await this.runCommand<PhoneResponse>(token, ...COMMANDS.getSignPhoneNumber, {});
+        return result.data?.telefon;
+    }
+
     async sendSignSMSCode(token: string, phone: string): Promise<string | undefined> {
         const result = await this.runCommand<SmsResponse>(token, ...COMMANDS.sendSignSMSCode, {
             CEPTEL: phone,
             KCEPTEL: false,
             TIP: "",
         });
-        return result.oid;
+        return result.data?.oid ?? result.oid;
     }
 
-    async verifySignSMSCode(token: string, smsCode: string, operationId: string): Promise<string | undefined> {
+    /**
+     * SMS kodunu doğrular **ve `invoices` listesindeki faturaları imzalar**.
+     *
+     * ☢️ İmzalama mali işlem oluşturur.
+     *
+     * `OPR: 1` ve `DATA` alanları zorunludur: bunlar olmadan GİB SMS kodunu
+     * doğrular ama hiçbir faturayı imzalamaz.
+     *
+     * @returns GİB faturaları imzaladıysa `true` (`data.sonuc === "1"`).
+     */
+    async verifySignSMSCode(
+        token: string,
+        smsCode: string,
+        operationId: string,
+        invoices: InvoiceListItem[] = [],
+    ): Promise<boolean> {
         const result = await this.runCommand<SmsResponse>(token, ...COMMANDS.verifySMSCode, {
             SIFRE: smsCode,
             OID: operationId,
+            OPR: 1,
+            DATA: invoices,
         });
-        return result.oid;
+        // GİB sonucu `data.sonuc` alanında bildirir: "1" imzalandı demektir.
+        return String(result.data?.sonuc ?? "") === "1";
     }
 
     // ─── High-level composite ──────────────────────────────────────────────────

@@ -39,12 +39,18 @@ export interface GibAuthResponse {
     messages?: GibApiMessage[];
 }
 
+/**
+ * `EARSIV_PORTAL_TASLAKLARI_GETIR` liste kaydı.
+ *
+ * Alan adları GİB portalının döndürdüğü gerçek anahtarlardır; tarih
+ * `GG-AA-YYYY` biçiminde gelir (sorgu parametreleri ise `GG/AA/YYYY`).
+ */
 export interface InvoiceListItem {
     ettn: string;
-    faturaTarihi: string;
-    aliciUnvan?: string;
-    aliciAdi?: string;
-    aliciSoyadi?: string;
+    belgeNumarasi?: string;
+    belgeTarihi?: string;
+    aliciVknTckn?: string;
+    aliciUnvanAdSoyad?: string;
     belgeTuru?: string;
     onayDurumu?: string;
     [key: string]: unknown;
