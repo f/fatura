@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { FaturaClient } from "../../src/index";
-import { mockFetchOnce, getFetchCall } from "../helpers/mock-fetch";
+import { mockFetchOnce, mockDraftCreation, getFetchCall, CREATE_CALL, GIB_DRAFT_CREATED } from "../helpers/mock-fetch";
 import { TOKEN, minimalInvoice, fullInvoice, invoiceListItem } from "../fixtures/invoice.fixture";
 
 describe("FaturaClient — invoice operations", () => {
@@ -15,127 +15,147 @@ describe("FaturaClient — invoice operations", () => {
 
     describe("createDraftInvoice", () => {
         it("sends the correct GIB command", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            expect(getFetchCall().cmd).toBe("EARSIV_PORTAL_FATURA_OLUSTUR");
+            expect(getFetchCall(CREATE_CALL).cmd).toBe("EARSIV_PORTAL_FATURA_OLUSTUR");
         });
 
         it("sends the correct pageName", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            expect(getFetchCall().pageName).toBe("RG_BASITFATURA");
+            expect(getFetchCall(CREATE_CALL).pageName).toBe("RG_BASITFATURA");
         });
 
         it("includes the token in the body", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            expect(getFetchCall().token).toBe(TOKEN);
+            expect(getFetchCall(CREATE_CALL).token).toBe(TOKEN);
         });
 
-        it("auto-generates a UUID when none is provided", async () => {
-            mockFetchOnce({ data: "ok" });
+        it("[BUG FIX] sends faturaUuid empty — GİB assigns the ETTN itself", async () => {
+            mockDraftCreation();
+            await client.createDraftInvoice(TOKEN, minimalInvoice);
+            expect(getFetchCall(CREATE_CALL).jp["faturaUuid"]).toBe("");
+        });
+
+        it("[BUG FIX] ignores invoiceDetails.uuid instead of sending it to GİB", async () => {
+            mockDraftCreation();
+            await client.createDraftInvoice(TOKEN, fullInvoice);
+            expect(getFetchCall(CREATE_CALL).rawBody).not.toContain(fullInvoice.uuid);
+        });
+
+        it("[BUG FIX] returns the ETTN assigned by GİB", async () => {
+            mockDraftCreation({ ettn: "0f5926b2-862b-4a31-a4a1-235118b7fc11", belgeNumarasi: "GIB2026000001644" });
             const result = await client.createDraftInvoice(TOKEN, minimalInvoice);
-            expect(result.uuid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+            expect(result.uuid).toBe("0f5926b2-862b-4a31-a4a1-235118b7fc11");
+            expect(result.documentNumber).toBe("GIB2026000001644");
         });
 
-        it("uses the UUID provided in invoiceDetails", async () => {
-            mockFetchOnce({ data: "ok" });
-            const result = await client.createDraftInvoice(TOKEN, fullInvoice);
-            expect(result.uuid).toBe(fullInvoice.uuid);
+        it("[BUG FIX] finds the new ETTN by diffing the draft list, not by taking the first row", async () => {
+            mockDraftCreation({ ettn: "yeni-ettn" }, [{ ettn: "onceden-var-olan" }]);
+            const result = await client.createDraftInvoice(TOKEN, minimalInvoice);
+            expect(result.uuid).toBe("yeni-ettn");
+        });
+
+        it("[BUG FIX] throws when GİB rejects the draft (error is only in the data text)", async () => {
+            mockFetchOnce({ data: [] });
+            mockFetchOnce({ data: "Ettn ya eksik ya boş ya da 36 uzunluk sınırına uymuyor." });
+            await expect(client.createDraftInvoice(TOKEN, minimalInvoice)).rejects.toThrow(/Ettn ya eksik/);
         });
 
         it("sets result.date to the invoice date", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             const result = await client.createDraftInvoice(TOKEN, minimalInvoice);
             expect(result.date).toBe(minimalInvoice.date);
         });
 
         it("spreads the API response into the result", async () => {
-            const apiResponse = { data: "ok", someField: "someValue" };
-            mockFetchOnce(apiResponse);
+            mockFetchOnce({ data: [] });
+            mockFetchOnce({ data: GIB_DRAFT_CREATED, someField: "someValue" });
+            mockFetchOnce({ data: [{ ettn: "gib-atanan-ettn" }] });
             const result = await client.createDraftInvoice(TOKEN, minimalInvoice);
-            expect(result).toMatchObject(apiResponse);
+            expect(result).toMatchObject({ data: GIB_DRAFT_CREATED, someField: "someValue" });
         });
 
         it("maps date to faturaTarihi", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            expect(getFetchCall().jp["faturaTarihi"]).toBe(minimalInvoice.date);
+            expect(getFetchCall(CREATE_CALL).jp["faturaTarihi"]).toBe(minimalInvoice.date);
         });
 
         it("maps time to saat", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            expect(getFetchCall().jp["saat"]).toBe(minimalInvoice.time);
+            expect(getFetchCall(CREATE_CALL).jp["saat"]).toBe(minimalInvoice.time);
         });
 
         it("maps taxIDOrTRID to vknTckn", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, fullInvoice);
-            expect(getFetchCall().jp["vknTckn"]).toBe(fullInvoice.taxIDOrTRID);
+            expect(getFetchCall(CREATE_CALL).jp["vknTckn"]).toBe(fullInvoice.taxIDOrTRID);
         });
 
         it("defaults vknTckn to 11111111111 when taxIDOrTRID is omitted", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            expect(getFetchCall().jp["vknTckn"]).toBe("11111111111");
+            expect(getFetchCall(CREATE_CALL).jp["vknTckn"]).toBe("11111111111");
         });
 
         it("maps title to aliciUnvan", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, fullInvoice);
-            expect(getFetchCall().jp["aliciUnvan"]).toBe(fullInvoice.title);
+            expect(getFetchCall(CREATE_CALL).jp["aliciUnvan"]).toBe(fullInvoice.title);
         });
 
         it("maps name to aliciAdi", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, fullInvoice);
-            expect(getFetchCall().jp["aliciAdi"]).toBe(fullInvoice.name);
+            expect(getFetchCall(CREATE_CALL).jp["aliciAdi"]).toBe(fullInvoice.name);
         });
 
         it("maps surname to aliciSoyadi", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, fullInvoice);
-            expect(getFetchCall().jp["aliciSoyadi"]).toBe(fullInvoice.surname);
+            expect(getFetchCall(CREATE_CALL).jp["aliciSoyadi"]).toBe(fullInvoice.surname);
         });
 
         it("maps fullAddress to bulvarcaddesokak", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, fullInvoice);
-            expect(getFetchCall().jp["bulvarcaddesokak"]).toBe(fullInvoice.fullAddress);
+            expect(getFetchCall(CREATE_CALL).jp["bulvarcaddesokak"]).toBe(fullInvoice.fullAddress);
         });
 
         it("maps city to sehir", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, fullInvoice);
-            expect(getFetchCall().jp["sehir"]).toBe(fullInvoice.city);
+            expect(getFetchCall(CREATE_CALL).jp["sehir"]).toBe(fullInvoice.city);
         });
 
         it("maps country to ulke", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, fullInvoice);
-            expect(getFetchCall().jp["ulke"]).toBe(fullInvoice.country);
+            expect(getFetchCall(CREATE_CALL).jp["ulke"]).toBe(fullInvoice.country);
         });
 
         it("maps taxOffice to vergiDairesi", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, fullInvoice);
-            expect(getFetchCall().jp["vergiDairesi"]).toBe(fullInvoice.taxOffice);
+            expect(getFetchCall(CREATE_CALL).jp["vergiDairesi"]).toBe(fullInvoice.taxOffice);
         });
 
         // ── BUG FIX: dispatchDate → irsaliyeTarihi (was discountDate) ──────────
 
         it("[BUG FIX] maps dispatchDate → irsaliyeTarihi", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, fullInvoice);
-            expect(getFetchCall().jp["irsaliyeTarihi"]).toBe(fullInvoice.dispatchDate);
+            expect(getFetchCall(CREATE_CALL).jp["irsaliyeTarihi"]).toBe(fullInvoice.dispatchDate);
         });
 
         it("[BUG FIX] irsaliyeTarihi is not taken from a 'discountDate' field", async () => {
             const invoice = { ...minimalInvoice, dispatchDate: "02/20/2024" };
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, invoice);
-            expect(getFetchCall().jp["irsaliyeTarihi"]).toBe("02/20/2024");
+            expect(getFetchCall(CREATE_CALL).jp["irsaliyeTarihi"]).toBe("02/20/2024");
         });
 
         // ── BUG FIX: halRusumuTutari from its own field ──────────────────────────
@@ -146,9 +166,9 @@ describe("FaturaClient — invoice operations", () => {
                 halRusumuTutari: "99.00",
                 hammaliyeTutari: "10.00",
             };
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, invoice);
-            const jp = getFetchCall().jp;
+            const jp = getFetchCall(CREATE_CALL).jp;
             expect(jp["halRusumuTutari"]).toBe("99.00");
             expect(jp["hammaliyeTutari"]).toBe("10.00");
         });
@@ -156,78 +176,78 @@ describe("FaturaClient — invoice operations", () => {
         // ── Items mapping ─────────────────────────────────────────────────────────
 
         it("maps items to malHizmetTable", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            const table = getFetchCall().jp["malHizmetTable"] as unknown[];
+            const table = getFetchCall(CREATE_CALL).jp["malHizmetTable"] as unknown[];
             expect(Array.isArray(table)).toBe(true);
             expect(table).toHaveLength(1);
         });
 
         it("maps item.name to malHizmet", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            const row = (getFetchCall().jp["malHizmetTable"] as Array<Record<string, unknown>>)[0];
+            const row = (getFetchCall(CREATE_CALL).jp["malHizmetTable"] as Array<Record<string, unknown>>)[0];
             expect(row["malHizmet"]).toBe(minimalInvoice.items[0].name);
         });
 
         it("maps item.VATRate to kdvOrani as string", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            const row = (getFetchCall().jp["malHizmetTable"] as Array<Record<string, unknown>>)[0];
+            const row = (getFetchCall(CREATE_CALL).jp["malHizmetTable"] as Array<Record<string, unknown>>)[0];
             expect(row["kdvOrani"]).toBe("20");
         });
 
         it("uses 'C62' as default unit type when unitType is omitted", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            const row = (getFetchCall().jp["malHizmetTable"] as Array<Record<string, unknown>>)[0];
+            const row = (getFetchCall(CREATE_CALL).jp["malHizmetTable"] as Array<Record<string, unknown>>)[0];
             expect(row["birim"]).toBe("C62");
         });
 
         it("uses item.unitType when provided", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, fullInvoice);
-            const row = (getFetchCall().jp["malHizmetTable"] as Array<Record<string, unknown>>)[0];
+            const row = (getFetchCall(CREATE_CALL).jp["malHizmetTable"] as Array<Record<string, unknown>>)[0];
             expect(row["birim"]).toBe("HUR");
         });
 
         it("formats item.price as 2-decimal string", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            const row = (getFetchCall().jp["malHizmetTable"] as Array<Record<string, unknown>>)[0];
+            const row = (getFetchCall(CREATE_CALL).jp["malHizmetTable"] as Array<Record<string, unknown>>)[0];
             expect(row["fiyat"]).toBe("100.00");
         });
 
         // ── Financial totals ──────────────────────────────────────────────────────
 
         it("formats grandTotal as 2-decimal string in matrah", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            expect(getFetchCall().jp["matrah"]).toBe("100.00");
+            expect(getFetchCall(CREATE_CALL).jp["matrah"]).toBe("100.00");
         });
 
         it("formats totalVAT as 2-decimal string in hesaplanankdv", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            expect(getFetchCall().jp["hesaplanankdv"]).toBe("20.00");
+            expect(getFetchCall(CREATE_CALL).jp["hesaplanankdv"]).toBe("20.00");
         });
 
         it("formats grandTotalInclVAT in vergilerDahilToplamTutar", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            expect(getFetchCall().jp["vergilerDahilToplamTutar"]).toBe("120.00");
+            expect(getFetchCall(CREATE_CALL).jp["vergilerDahilToplamTutar"]).toBe("120.00");
         });
 
         it("formats paymentTotal in odenecekTutar", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            expect(getFetchCall().jp["odenecekTutar"]).toBe("120.00");
+            expect(getFetchCall(CREATE_CALL).jp["odenecekTutar"]).toBe("120.00");
         });
 
         it("puts Turkish price text in 'not' field", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            const not = getFetchCall().jp["not"] as string;
+            const not = getFetchCall(CREATE_CALL).jp["not"] as string;
             expect(not).toContain("LIRA");
             expect(not).toContain("KURUS");
         });
@@ -237,9 +257,9 @@ describe("FaturaClient — invoice operations", () => {
                 ...minimalInvoice,
                 items: [{ name: "Minimal Item", price: 50 }],
             };
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, invoice);
-            const row = (getFetchCall().jp["malHizmetTable"] as Array<Record<string, unknown>>)[0];
+            const row = (getFetchCall(CREATE_CALL).jp["malHizmetTable"] as Array<Record<string, unknown>>)[0];
             expect(row["malHizmetTutari"]).toBe("0.00"); // 0 * 0
             expect(row["kdvOrani"]).toBe("0");
             expect(row["kdvTutari"]).toBe("0.00");
@@ -248,24 +268,24 @@ describe("FaturaClient — invoice operations", () => {
 
         it("maps returnItems to iadeTable as empty objects", async () => {
             const invoice = { ...minimalInvoice, returnItems: ["item1", "item2"] };
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, invoice);
-            const iadeTable = getFetchCall().jp["iadeTable"] as unknown[];
+            const iadeTable = getFetchCall(CREATE_CALL).jp["iadeTable"] as unknown[];
             expect(Array.isArray(iadeTable)).toBe(true);
             expect(iadeTable).toHaveLength(2);
             expect(iadeTable[0]).toEqual({});
         });
 
         it("defaults currency to TRY", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, minimalInvoice);
-            expect(getFetchCall().jp["paraBirimi"]).toBe("TRY");
+            expect(getFetchCall(CREATE_CALL).jp["paraBirimi"]).toBe("TRY");
         });
 
         it("uses specified currency", async () => {
-            mockFetchOnce({ data: "ok" });
+            mockDraftCreation();
             await client.createDraftInvoice(TOKEN, fullInvoice);
-            expect(getFetchCall().jp["paraBirimi"]).toBe("EUR");
+            expect(getFetchCall(CREATE_CALL).jp["paraBirimi"]).toBe("EUR");
         });
     });
 

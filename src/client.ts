@@ -25,6 +25,20 @@ function assertApiSuccess(response: ApiResponse | GibAuthResponse): void {
     }
 }
 
+/**
+ * GİB taslak oluşturma cevabını doğrular.
+ *
+ * `EARSIV_PORTAL_FATURA_OLUSTUR` hata durumunda da `error` alanı göndermez;
+ * sonucu yalnızca `data` içindeki serbest metinden anlaşılır. Bu yüzden
+ * `assertApiSuccess` bu komut için yeterli değildir.
+ */
+function assertDraftCreated(response: ApiResponse): void {
+    const text = typeof response.data === "string" ? response.data : "";
+    if (!/başarıyla oluşturulmuştur/i.test(text)) {
+        throw new Error(text || "GİB taslak faturayı oluşturmadı");
+    }
+}
+
 // ─── Internal types ──────────────────────────────────────────────────────────
 
 interface DateRange {
@@ -132,9 +146,10 @@ export class FaturaClient {
     // ─── Invoice CRUD ──────────────────────────────────────────────────────────
 
     async createDraftInvoice(token: string, invoiceDetails: InvoiceDetails): Promise<DraftInvoice> {
-        const faturaUuid = invoiceDetails.uuid ?? generateUUID();
         const invoiceData: Record<string, unknown> = {
-            faturaUuid,
+            // GİB ETTN'i sunucu tarafında üretir; istemciden gelen bir UUID
+            // "Ettn ya eksik ya boş ya da 36 uzunluk sınırına uymuyor." hatası verir.
+            faturaUuid: "",
             belgeNumarasi: invoiceDetails.documentNumber ?? "",
             faturaTarihi: invoiceDetails.date,
             saat: invoiceDetails.time,
@@ -241,9 +256,33 @@ export class FaturaClient {
             not: convertPriceToText(invoiceDetails.paymentTotal),
         };
 
-        const invoice = await this.runCommand<ApiResponse>(token, ...COMMANDS.createDraftInvoice, invoiceData);
+        // ETTN sunucu tarafında atandığı için, oluşturmadan önce/sonra o güne ait
+        // taslak listesi karşılaştırılarak yeni kayıt bulunur.
+        const before = new Set(
+            (
+                await this.getAllInvoicesByDateRange(token, {
+                    startDate: invoiceDetails.date,
+                    endDate: invoiceDetails.date,
+                })
+            ).map((item) => item.ettn),
+        );
 
-        return { date: invoiceDetails.date, uuid: faturaUuid, ...invoice };
+        const invoice = await this.runCommand<ApiResponse>(token, ...COMMANDS.createDraftInvoice, invoiceData);
+        assertDraftCreated(invoice);
+
+        const after = await this.getAllInvoicesByDateRange(token, {
+            startDate: invoiceDetails.date,
+            endDate: invoiceDetails.date,
+        });
+        const created = after.find((item) => !before.has(item.ettn));
+
+        return {
+            date: invoiceDetails.date,
+            uuid: created?.ettn ?? "",
+            documentNumber: created?.belgeNumarasi,
+            listItem: created,
+            ...invoice,
+        };
     }
 
     async findInvoice(token: string, draftInvoice: DraftInvoice): Promise<InvoiceListItem | undefined> {
