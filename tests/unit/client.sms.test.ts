@@ -11,6 +11,38 @@ describe("FaturaClient — SMS verification", () => {
         client = new FaturaClient("PROD");
     });
 
+    // ─── getSignPhoneNumber ───────────────────────────────────────────────────
+
+    describe("getSignPhoneNumber", () => {
+        it("sends the correct GIB command", async () => {
+            mockFetchOnce({ data: { telefon: "5301234567" } });
+            await client.getSignPhoneNumber(TOKEN);
+            expect(getFetchCall().cmd).toBe("EARSIV_PORTAL_TELEFONNO_SORGULA");
+        });
+
+        it("sends the correct pageName", async () => {
+            mockFetchOnce({ data: { telefon: "5301234567" } });
+            await client.getSignPhoneNumber(TOKEN);
+            expect(getFetchCall().pageName).toBe("RG_SMSONAY");
+        });
+
+        it("sends an empty payload", async () => {
+            mockFetchOnce({ data: { telefon: "5301234567" } });
+            await client.getSignPhoneNumber(TOKEN);
+            expect(getFetchCall().jp).toEqual({});
+        });
+
+        it("returns the registered phone number", async () => {
+            mockFetchOnce({ data: { telefon: "5301234567" } });
+            expect(await client.getSignPhoneNumber(TOKEN)).toBe("5301234567");
+        });
+
+        it("returns undefined when no phone is registered", async () => {
+            mockFetchOnce({ data: {} });
+            expect(await client.getSignPhoneNumber(TOKEN)).toBeUndefined();
+        });
+    });
+
     // ─── sendSignSMSCode ──────────────────────────────────────────────────────
 
     describe("sendSignSMSCode", () => {

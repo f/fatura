@@ -60,6 +60,10 @@ interface SmsResponse {
     data?: { oid?: string };
 }
 
+interface PhoneResponse {
+    data?: { telefon?: string };
+}
+
 interface MalHizmetRow {
     iskontoArttm: string;
     malHizmet: string;
@@ -418,6 +422,18 @@ export class FaturaClient {
     }
 
     // ─── SMS ───────────────────────────────────────────────────────────────────
+
+    /**
+     * İmza SMS'inin gönderileceği **kayıtlı** cep telefonunu döner.
+     *
+     * e-Arşiv portalı SMS'i şirket yetkilisinin sisteme kayıtlı numarasına
+     * gönderir; numara dışarıdan verilmez. `sendSignSMSCode` çağrılmadan önce
+     * numara buradan alınmalıdır.
+     */
+    async getSignPhoneNumber(token: string): Promise<string | undefined> {
+        const result = await this.runCommand<PhoneResponse>(token, ...COMMANDS.getSignPhoneNumber, {});
+        return result.data?.telefon;
+    }
 
     async sendSignSMSCode(token: string, phone: string): Promise<string | undefined> {
         const result = await this.runCommand<SmsResponse>(token, ...COMMANDS.sendSignSMSCode, {
